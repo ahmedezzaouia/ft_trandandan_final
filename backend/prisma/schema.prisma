@@ -1,0 +1,53 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+
+enum UserStatus {
+  ONLINE
+  OFFLINE
+  IN_GAME
+}
+
+
+model User {
+  id                  String  @id @default(uuid())
+  username            String  @unique
+  email               String  @unique
+  isTwofactorsEnabled Boolean @default(false)
+  twoFactorsSecret    String?
+  avatarUrl           String
+  status              UserStatus @default(OFFLINE)
+  channel             Channel[]
+  channelMessage      ChannelMessage[]
+}
+
+model Channel {
+  id        String  @id @default(uuid())
+  name      String @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ChannelMessage      ChannelMessage[]
+  userId    String
+  user      User    @relation(fields: [userId], references: [id])
+}
+
+
+model ChannelMessage {
+  id        String  @id @default(uuid())
+  message   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  channelId String
+  channel   Channel @relation(fields: [channelId], references: [id])
+  userId    String  // Reference to the user who created the message
+  user      User    @relation(fields: [userId], references: [id])
+}

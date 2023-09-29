@@ -1,0 +1,12 @@
+
+@media   (max-width: 3000px) {
+   .sidemodelAM{
+         display: none;
+   }
+}
+
+@media   (max-width: 1650px) {
+   .sidemodelAM{
+         display: block;
+   }
+}
