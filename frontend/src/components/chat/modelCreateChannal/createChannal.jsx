@@ -1,9 +1,24 @@
 import { useState } from "react";
 
-
-export default function CreateChannal() {
+export default function CreateChannal(props) {
   const [showModal, setShowModal] = useState(false);
+  const [channelName, setChannelName] = useState('');
 
+
+  const handleInputChange = (event) => {
+    setChannelName(event.target.value);
+  };
+
+
+  const handleAddChannel = () => {
+    // Call the addChannel function from props to pass the channelName to the main component
+    props.addChannel(channelName);
+    // Clear the input field
+    setChannelName('');
+
+    // Close the modal
+    setShowModal(false);
+  };
 
   return (
     <div>
@@ -22,42 +37,44 @@ export default function CreateChannal() {
           <div className="bg-slate-800 rounded-2xl p-5 w-96">
             <span className="font-bold text-white "> Name of channel</span>
             <div className="flex items-center justify-between">
-              <input type="text" 
+              <input
+                type="text"
                 placeholder="name of channel"
                 className="bg-slate-900 w-full my-5 rounded-lg border border-gray-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-gray-700 focus:ring-offset-2 focus:ring-offset-gray-800"
+                value={channelName}
+                onChange={handleInputChange}
               />
             </div>
 
-              {/* type of channel */}
-              <div className="flex items-center">
-                <div className="mx-5">
-                  <input type="radio" name="type" value="public" />
-                  <label  className="text-white">Public</label>
-                </div>
-                <div>
-                  <input type="radio" name="type" value="private" />
-                  <label  className="text-white">Private</label>
-                </div>
-                <div>
-                  <input type="radio" name="type" value="protected" />
-                  <label  className="text-white">Protected</label>
-                </div>
+            {/* type of channel */}
+            <div className="flex items-center">
+              <div className="mx-5">
+                <input type="radio" name="type" value="public" />
+                <label className="text-white">Public</label>
               </div>
-                <div className="flex justify-end mt-5">
-                  <button
-                    className="bg-slate-900 text-white px-4 py-2 rounded-lg mr-2"
-                    onClick={() => setShowModal(false)}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    className="bg-slate-900 text-white px-4 py-2 rounded-lg"
-                    onClick={() => setShowModal(false)}  
-                  >
-                    Save
-
-                  </button>
+              <div>
+                <input type="radio" name="type" value="private" />
+                <label className="text-white">Private</label>
               </div>
+              <div>
+                <input type="radio" name="type" value="protected" />
+                <label className="text-white">Protected</label>
+              </div>
+            </div>
+            <div className="flex justify-end mt-5">
+              <button
+                className="bg-slate-900 text-white px-4 py-2 rounded-lg mr-2"
+                onClick={() => setShowModal(false)}
+              >
+                Cancel
+              </button>
+              <button
+                className="bg-slate-900 text-white px-4 py-2 rounded-lg"
+                onClick={handleAddChannel}
+              >
+                Add Channel
+              </button>
+            </div>
           </div>
         </div>
       )}

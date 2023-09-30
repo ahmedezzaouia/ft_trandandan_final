@@ -3,162 +3,145 @@ import "./chatContent.css";
 
 import TopBar from "./topbar/topbar";
 
-import {  use, useEffect } from "react";
-import io from "socket.io-client";
+import { useEffect } from "react";
 import { useState } from "react";
-import { data } from "autoprefixer";
+import socket from "@services/socket";
 
-
-
-export default function ChatContent({ user, directMessage }) {
-  const socket = io("http://localhost:3001"); // Replace with your backend server URL
-  console.log("Socket connection established");
-  const [messages, setMessages] = useState([]);
+export default function ChatContent({
+  user,
+  channel,
+  username,
+  setUsername,
+  directMessage,
+  setDirectMessage,
+}) {
+  // const [messages, setMessages] = useState([]); // todo hadi ma3dha ta m3na w tat dir liya probleme fach tn 7idha
   const [messageInput, setMessageInput] = useState(""); // State for input field
-  // const [isChannel, setIsChannel] = useState(false);
-  const [username, setUsername] = useState("");
-  const [channel, setChannel] = useState("general"); // Default channel //todo channel will be global state
   const [senderMessages, setSenderMessages] = useState([]);
   const [recieverMessages, setRecieverMessages] = useState([]);
   const [avaterUser, setAvaterUser] = useState("");
   const [NameUser, setNameUser] = useState("");
   const [avaterReciever, setAvaterReciever] = useState("");
 
-
-
-  const sendMessage = () => {
-    // if (messageInput === "") return;
-    // Send the message input to the server
-    // isChannel ?
-    socket.emit("channelMessage", {
-      sender: user.username,
-      channel:  channel,
-      message: messageInput,
-      // }) :
-      // socket.emit("directMessage", {
-      //   sender: user.username,
-      //   message: messageInput,
-    });
-    setMessageInput("");
-    // Clear the input field after sending the message
-
-    // save the message in the state
-    if (messageInput === "") return;
-    setMessages((prevMessages) => [
-      ...prevMessages,
-      { sender: user.username, channel: channel, message: messageInput },
-    ]);
-  };
-
   useEffect(() => {
-    
     // Search for the username and set it in the state
     async function fetchUsername() {
-      const storedUserData = sessionStorage.getItem('user-store');
+      const storedUserData = sessionStorage.getItem("user-store");
       if (storedUserData) {
         try {
           // Parse the stored data as JSON
           const userData = await JSON.parse(storedUserData);
-  
+
           // Access the username property
-          const saveusername = userData.state.user.username;
-  
+          const saveusername = userData.state.user?.username;
+
           setUsername(saveusername);
         } catch (error) {
-          console.error('Error parsing stored data:', error);
+          console.error("Error parsing stored data:", error);
         }
       } else {
-        console.warn('User data not found in session storage.');
+        console.warn("User data not found in session storage.");
       }
     }
-  
+
     fetchUsername(); // Fetch the username
-  
+
     // Return a cleanup function if needed (e.g., to unsubscribe from listeners)
     return () => {
       // Clean up any event listeners or subscriptions
     };
   }, []); // Empty dependency array to run this effect only once
-  
 
+  const sendMessage = () => {
+    // Send the message input to the server
+    // isChannel ?
+    socket.emit("channelMessage", {
+      sender: user?.username,
+      channel: channel,
+      message: messageInput,
+      // }) :
+      // socket.emit("directMessage", {
+      //   sender: user?.username,
+      //   message: messageInput,
+    });
+    // Clear the input field after sending the message
+
+    // setMessages((prevMessages) => [
+    //   ...prevMessages,
+    //   { sender: user?.username, channel: channel, message: messageInput },
+    // ]);
+
+    setRecieverMessages((prevMessages) => [
+      ...prevMessages, 
+      { sender: user?.username, channel: channel, message: messageInput },
+    ]);
+
+    setSenderMessages((prevMessages) => [
+      ...prevMessages,
+      { sender: user?.username, channel: channel, message: messageInput },
+    ]);
+
+
+    if (messageInput === "") return;
+    setMessageInput("");
+  };
 
   useEffect(() => {
     // Check if username is defined and the channel is set
-    
     if (username) {
       // Join the channel
-      socket.emit('joinChannel', { channel: channel });
-      
+      socket.emit("joinChannel", { channel: channel });
+
       // Send event to get all messages from the channel
       socket.emit("listChannelMessages", {
         sender: username,
         channel: channel,
       });
-      
       // List all messages from the channel
       socket.on("listChannelMessages", (data) => {
         // Check if data.msg is an array before mapping
-        if (username === data.msg[0].user.username) {
-          if (Array.isArray(data.msg)) {
-            // Update your state with the messages
-            if (data.msg.length === 0) {
-              sconsole.log("no messages");
-              return;
-            }
-            console.log("data.msg", data.msg);
-            // setMessages(data.msg);
+        if (data.msg.length === 0) {
+          data.msg = [];
+          if (username === user?.username) {
+            setSenderMessages(data.msg);
+          }
+          setRecieverMessages(data.msg);
+        } else {
+          if (username === user?.username) {
             setSenderMessages(data.msg);
             setAvaterUser(data.msg[0].user.avatarUrl);
-            setNameUser(data.msg[0].user.username);
+            setNameUser(user?.username);
+            // clear the reciever messages
+            setRecieverMessages([]);
           } else {
-            console.error("Received data.msg is not an array:", data.msg);
-          }
-        }
-        else {
-          if (Array.isArray(data.msg)) {
-            // Update your state with the messages
-            if (data.msg.length === 0) {
-              sconsole.log("no messages");
-              return;
-            }
-            console.log("data.msg", data.msg);
             setRecieverMessages(data.msg);
             setAvaterReciever(data.msg[0].user.avatarUrl);
-            setNameUser(data.msg[0].user.username);
-          } else {
-            console.error("Received data.msg is not an array:", data.msg);
+            setNameUser(user?.username);
+            // clear the sender messages
+            setSenderMessages([]);
           }
         }
       });
-  
+
       return () => {
         // Clean up event listeners or subscriptions related to this channel
         socket.off("listChannelMessages");
       };
     }
-    console.log(username)
-    // print sender 
-    
   }, [username, channel, messageInput]); // Re-run this effect when the username or channel changes
-  
+  // todo remove this send message from useEffect
 
-
-
-  
   return (
     <div className=" chat-content flex-1 flex flex-col overflow-hidden rounded-3xl shadow border border-gray-800 lg:max-w-screen-md">
       {/* <!-- Top bar --> */}
-      <TopBar user={user} directMessage={directMessage} />
+      <TopBar username={username} directMessage={directMessage} />
 
       {/* <!-- Chat direct messages --> */}
-      {directMessage !== "directMessage" ? (
+      {directMessage ? (
         <div className=" p-14 flex-1 overflow-auto">
           {/* <!-- A sender message --> */}
           <div className="flex items-start mb-4 text-sm">
-            <img
-              src={avaterUser}
-              className="w-10 h-10 rounded-full mr-3"
-              />
+            <img src={avaterUser} className="w-10 h-10 rounded-full mr-3" />
             <div className="flex-1 overflow-hidden">
               <div className="flex justify-between">
                 <span className="font-bold text-white">{NameUser}</span>
@@ -168,8 +151,7 @@ export default function ChatContent({ user, directMessage }) {
                 How are you doing joey?
               </p>
               <p className="text-white leading-normal">
-                
-                {messages.map((message, index) => (
+                {senderMessages.map((message, index) => (
                   <p key={index}>{message.text}</p>
                 ))}
               </p>
@@ -181,19 +163,21 @@ export default function ChatContent({ user, directMessage }) {
         // channel messages
         <div className=" p-14 flex-1 overflow-auto">
           <div className="flex flex-col mb-4 text-sm">
-                 {senderMessages.map((message, index) => (
+            {senderMessages.map((message, index) => (
               <>
                 <div className="flex items-center">
                   <img
                     src={message.user.avatarUrl}
                     className="w-10 h-10 rounded-full mr-3"
                   />
-                  <span className="font-bold text-white">{message.user.username}</span>
+                  <span className="font-bold text-white">
+                    {message.user?.username}
+                  </span>
                 </div>
                 <p className="text-white font-sans px-14" key={index}>
-                    <span className="text-white font-sans " key={index}>
-                      {message.message}
-                    </span>
+                  <span className="text-white font-sans " key={index}>
+                    {message.message}
+                  </span>
                 </p>
               </>
             ))}
@@ -204,16 +188,17 @@ export default function ChatContent({ user, directMessage }) {
                     src={message.user.avatarUrl}
                     className="w-10 h-10 rounded-full mr-3"
                   />
-                  <span className="font-bold text-white">{message.user.username}</span>
+                  <span className="font-bold text-white">
+                    {message.user?.username}
+                  </span>
                 </div>
                 <p className="text-white font-sans px-14" key={index}>
-                    <span className="text-white font-sans " key={index}>
-                      {message.message}
-                    </span>
+                  <span className="text-white font-sans " key={index}>
+                    {message.message}
+                  </span>
                 </p>
               </>
-            ))  
-            }
+            ))}
           </div>
         </div>
       )}
@@ -237,6 +222,7 @@ export default function ChatContent({ user, directMessage }) {
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
               className="fill-current h-6 w-6 block bg-slate-800 cursor-pointer hover:text-white"
+              value={messageInput}
               onClick={sendMessage}
             >
               <path

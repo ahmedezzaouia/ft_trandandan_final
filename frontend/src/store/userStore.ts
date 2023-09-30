@@ -49,4 +49,24 @@ const useUserStore = create<UserStore>(
   )
 );
 
+
+const useChannelStore = create((set) => ({
+  channel: 'general', // Default channel
+  setChannel: (newChannel : string) => set({ channel: newChannel }),
+}));
+
+const userNameStore = create((set) => ({
+  username: '', // Default channel
+  setUsername: (newUsername : string) => set({ username: newUsername }),
+}));
+
+// declare a boolean state for direct messages
+const directMessageStore = create((set) => ({
+  directMessage: false, // Default channel
+  setDirectMessage: (newDirectMessage : boolean) => set({ directMessage: newDirectMessage }),
+}));
+
 export default useUserStore;
+export { useChannelStore };
+export { userNameStore };
+export { directMessageStore };

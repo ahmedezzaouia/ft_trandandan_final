@@ -9,12 +9,9 @@ import { fetchUser } from "@/services/userServices";
 import useSWR from "swr";
 
 
-
-
-
-
-
 export default function Chat() {
+  
+  
   const params = useParams();
   const userId = params.id;
   const { data: user, error } = useSWR(`http://localhost:3001/user/${userId}`, fetchUser);
@@ -23,7 +20,7 @@ export default function Chat() {
   return (
     <div className="chat-container">
       <div className="flex h-full">
-        <ChannalAndDirectMessage user={user}/>
+        <ChannalAndDirectMessage user={user} />
         <ChatContent user={user} />
         <AdminsMembers user={user}/>
       </div>

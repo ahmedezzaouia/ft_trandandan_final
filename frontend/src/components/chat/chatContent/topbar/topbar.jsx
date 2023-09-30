@@ -1,6 +1,6 @@
-import { use, useState } from "react";
+import { useState } from "react";
 
-export default function TopBar({user, directMessage}){
+export default function TopBar({username, directMessage}){
     const [isComponentVisible, setIsComponentVisible] = useState(false);
 
     return(
@@ -9,7 +9,7 @@ export default function TopBar({user, directMessage}){
         {/* name of channal */}
         <div className="flex flex-col " >
           <h3 className=" mb-1 font-extrabold">
-            <span className="text-xl font-bold opacity-50">#</span> {directMessage !== "directMessage" ? user?.username : "general"}
+            <span className="text-xl font-bold opacity-50">#</span> {directMessage ? username : "general"}
           </h3>
         </div>
 
@@ -18,7 +18,6 @@ export default function TopBar({user, directMessage}){
         <div className="ml-auto  lg:block" onClick={() => setIsComponentVisible(!isComponentVisible)}>
           <div className="relative">
             {/* megamenu profile */}
-
             <div className="absolute top-0 right-0  -mt-5 mr-2 flex items-center" >
               {/* button of profile */}
               <svg

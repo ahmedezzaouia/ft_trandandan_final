@@ -96,7 +96,6 @@ export class ChatGateway {
       message: string },
     @ConnectedSocket() client: Socket,
   ) {
-    console.log('data**********2', data.sender);
     const saveMessage = await this.channelService.createChannelMessage(data);
     this.server.to(data.channel).emit('channelMessage', saveMessage);
     // this.server.emit('channelMessage', saveMessage);
@@ -107,7 +106,8 @@ export class ChatGateway {
 
   // Join a specific channel room
   @SubscribeMessage('joinChannel')
-  async joinChannel(@MessageBody() data: { channel: string }, @ConnectedSocket() client: Socket) {
+  async joinChannel(@MessageBody() 
+  data: { channel: string }, @ConnectedSocket() client: Socket) {
     client.join(data.channel);
   }
   
@@ -120,9 +120,14 @@ export class ChatGateway {
     @ConnectedSocket() client: Socket,
   ) {
 
-  
-    console.log('data**********2', data.sender);
-    try {
+    // console.log("channel", data.channel);
+    // console.log("sender", data.sender);
+
+      try {
+        if (!data.channel || !data.sender) {
+          // throw new Error('Channel not found');
+          return;
+        }
       const user = await this.prisma.user.findUnique({
         where: {
           username: data.sender,
@@ -163,10 +168,10 @@ export class ChatGateway {
       }
       );
 
+      // console.log("msg", msg);
+
 
       this.server.to(data.channel).emit('listChannelMessages', { msg });
-      
-      console.log("messages", msg);
       return msg;
 
     } catch (error) {
@@ -176,4 +181,96 @@ export class ChatGateway {
     
   }
   
+
+
+  // saveChannelName to database
+  @SubscribeMessage('saveChannelName')
+  async saveChannelName(
+    @MessageBody() data: {
+      channel: string;
+      sender: string;
+    },
+    @ConnectedSocket() client: Socket,
+    ) {
+    const user = await this.prisma.user.findUnique({
+      where: {
+        username: data.sender,
+      },
+    });
+
+    const checkChannel = await this.prisma.channel.findUnique({
+      where: {
+        name: data.channel,
+      },
+    });
+    if (checkChannel) {
+      throw new Error('Channel already exists');
+    }
+    const saveChannel = await this.prisma.channel.create({
+      data: {
+        name: data.channel,
+        user: {
+          connect: {
+            username: user.username,
+          },
+        },
+      },
+    });
+
+    // let channel = [] ;
+    // channel.push(saveChannel);
+    // console.log("channel", channel);
+    
+
+    this.server.emit('saveChannelName', saveChannel);
+    return saveChannel;
+  }
+
+
+  // get all channels
+  @SubscribeMessage('listChannels')
+  async listChannels(
+    @MessageBody() data: { sender: string, channel: string },
+    @ConnectedSocket() client: Socket,
+  ) {
+    
+    const user = await this.prisma.user.findUnique({
+      where: {
+        username: data.sender,
+      },
+    });
+    if (!user) {
+      throw new Error('User not found');
+    }
+    const channels = await this.prisma.channel.findMany({
+      where: {
+        userId: user.id,
+      },
+      include: {
+        user: true,
+      },
+    });
+
+    // console.log("channels", channels);
+    this.server.to(data.channel).emit('listChannels', channels);
+    return channels;
+  }
+
+
+  // get all users
+  @SubscribeMessage('getAllUsers')
+  async listUsers(
+    @MessageBody() data: { sender: string },
+    @ConnectedSocket() client: Socket,
+  ) {
+    const users = await this.prisma.user.findMany({
+       include:{
+        channel: true,
+       }
+      },
+    );
+    console.log("users", users);
+    this.server.emit('getAllUsers', users);
+    return users;
+  }
 }
