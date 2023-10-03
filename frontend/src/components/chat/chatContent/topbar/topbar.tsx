@@ -1,7 +1,10 @@
 import { useState } from "react";
+import  {useIsDirectMessage}  from "@/store/userStore";
 
-export default function TopBar({username, directMessage}){
+export default function TopBar({user, username} : {user:any, username: string}){
     const [isComponentVisible, setIsComponentVisible] = useState(false);
+    const {isDirectMessage, setIsDirectMessage} = useIsDirectMessage();
+
 
     return(
         <>
@@ -9,7 +12,7 @@ export default function TopBar({username, directMessage}){
         {/* name of channal */}
         <div className="flex flex-col " >
           <h3 className=" mb-1 font-extrabold">
-            <span className="text-xl font-bold opacity-50">#</span> {directMessage ? username : "general"}
+            <span className="text-xl font-bold opacity-50">#</span> {isDirectMessage ? username : "general"}
           </h3>
         </div>
 

@@ -28,9 +28,9 @@ type MyDevTools = (
 const useUserStore = create<UserStore>(
   (persist as MyPersist)(
     (devtools as MyDevTools)(
-      (set) => ({
+      (set:any) => ({
         user: null,
-        setUser: (user) => set({ user }),
+        setUser: (user:any) => set({ user }),
         getUser: async () => {
           try {
             const newUser = await fetchLoggedUser();
@@ -49,24 +49,20 @@ const useUserStore = create<UserStore>(
   )
 );
 
+// Custom hook to check if the user click on a direct message or channel
+// userStore.ts
 
-const useChannelStore = create((set) => ({
-  channel: 'general', // Default channel
-  setChannel: (newChannel : string) => set({ channel: newChannel }),
+type IsDirectMessageType = {
+  isDirectMessage: boolean;
+  setIsDirectMessage: (isDirectMessage: boolean) => void;
+}
+
+const useIsDirectMessage = create<IsDirectMessageType>((set) => ({
+  isDirectMessage: false,
+  setIsDirectMessage: (isDirectMessage: boolean) => set({ isDirectMessage }),
 }));
 
-const userNameStore = create((set) => ({
-  username: '', // Default channel
-  setUsername: (newUsername : string) => set({ username: newUsername }),
-}));
-
-// declare a boolean state for direct messages
-const directMessageStore = create((set) => ({
-  directMessage: false, // Default channel
-  setDirectMessage: (newDirectMessage : boolean) => set({ directMessage: newDirectMessage }),
-}));
 
 export default useUserStore;
-export { useChannelStore };
-export { userNameStore };
-export { directMessageStore };
+export { useIsDirectMessage };
+

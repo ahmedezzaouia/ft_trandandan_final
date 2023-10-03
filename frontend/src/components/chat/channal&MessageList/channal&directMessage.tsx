@@ -4,23 +4,24 @@ import CreateChannal from "../modelCreateChannal/createChannal";
 import { useEffect, useState } from "react";
 import socket from "@/services/socket";
 import ListUsersFriends from "./listUsersFriends/listUsersFriends";
+import { useIsDirectMessage } from "@/store/userStore";
+import useIsChannel from "@/store/channelStore";
+import { useChannleStore } from "@/store/channelStore";
 
-export default function ChannalAndDirectMessage({
-  user,
-  channel,
-  setChannel,
-  directMessage,
-  setDirectMessage,
-}) {
-  const [channalPage, setChannalPage] = useState(false);
-  const [channels, setChannels] = useState([]);
+export default function ChannalAndDirectMessage({ user }: { user: any }) {
+
+  const { isDirectMessage, setIsDirectMessage } = useIsDirectMessage();
+  const { isChannel, setIsChannel } = useIsChannel();
+
+  const { channel, setChannel } = useChannleStore();
+  const [channels, setChannels] = useState<string[]>([]);
   const [username, setUsername] = useState("");
-  const [nameUser, setNameUser] = useState("");
+
   // This function will be passed as a prop to Child1
-  const addChannel = (channelName) => {
+  const addChannel = (channelName: any) => {
     // Add the new channel name to the existing list of channels
     setChannels([...channels, channelName]);
-    if (channels !== []) {
+    if (username !== "") {
       socket.emit("saveChannelName", {
         channel: channelName,
         sender: username,
@@ -58,7 +59,6 @@ export default function ChannalAndDirectMessage({
       // Clean up any event listeners or subscriptions
     };
   }, []); // Empty dependency array to run this effect only once
-
   // get all channels
   useEffect(() => {
     if (username !== "") {
@@ -70,7 +70,7 @@ export default function ChannalAndDirectMessage({
       // data returned from server as array of objects
       socket.on("listChannels", (data) => {
         if (data[0]?.user.username !== username) return;
-        data.map((channel) => {
+        data.map((channel: any) => {
           if (channel.name === "general") return;
           setChannels((prevChannels) => [...prevChannels, channel.name]);
         });
@@ -78,29 +78,16 @@ export default function ChannalAndDirectMessage({
     }
   }, [username]);
 
-  function switchChannelName(channelName) {
-    setDirectMessage(false);
-    console.log("directMessage2", directMessage);
+  function switchChannelName(channelName: any) {
+    setIsDirectMessage(false);
     setChannel(channelName);
-    console.log("saving channel name channlelist", channel);
   }
 
-  // todo to pass channel name to chatContent you need to use global state
-
-  if (directMessage) {
-    // window.location.href = `/chat/${user?.id}/channalMessage`;
-    // to avoid reload page we will use another way
-    // setNameUser(user?.username);
-  }
-  if (channalPage) {
-    // window.location.href = `/chat/${user?.id}/channalMessage`;
-  }
   function setChannalPageAndSavedefaultName() {
-    setChannalPage(!channalPage);
+    setIsDirectMessage(false);
+    setIsChannel(true);
     setChannel("general");
-    setDirectMessage(false);
   }
-
 
   return (
     <div className="list-div bg-slate-900 mr-10 ml-10 text-purple-lighter  w-80  hidden lg:block rounded-2xl overflow-hidden border border-gray-800">
@@ -143,8 +130,6 @@ export default function ChannalAndDirectMessage({
         </div>
         <ul>
           {channels.map((channelName, index) => (
-            // onclick list all messages in this channel
-
             <li
               className="bg-teal-dark py-4 px-4 text-gray-400 font-bold  hover:bg-slate-700 hover:text-white hover:opacity-100 rounded-2xl cursor-pointer"
               key={index}
@@ -167,13 +152,8 @@ export default function ChannalAndDirectMessage({
             Direct Messages
           </span>
         </div>
-            <ListUsersFriends
-              username={username}
-              directMessage={directMessage}
-              setDirectMessage={setDirectMessage}
-            />
-            {/* list all users in database here insead of above*/}
-          </div>
-        </div>
+        <ListUsersFriends username={username} />
+      </div>
+    </div>
   );
 }

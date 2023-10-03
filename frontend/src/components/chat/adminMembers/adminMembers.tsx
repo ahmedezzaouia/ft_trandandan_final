@@ -1,4 +1,4 @@
-export default function AdminsMembers({user}) {
+export default function AdminsMembers({ user } : { user: any}) {
   return (
     <div className="bg-slate-900 ml-12 pr-40 rounded-2xl hidden lg:block admin-div border border-gray-700">
       {/* admins */}
@@ -6,33 +6,30 @@ export default function AdminsMembers({user}) {
         # Admins
       </h3>
       {/* icon is online   */}
-<span className="relative flex h-1 w-3 ml-10 mt-0">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-3 w-3 bg-green-400"></span>
-                  </span>      <div className="flex items-center  w-12 h-12 mr-2 ml-10">
-        <img
-          src={user?.avatarUrl}
-          alt=""
-          className="rounded-3xl"
-        />
-        <span className="text-white font-bold  opacity-90 ml-10">{user?.username}</span>
+      <span className="relative flex h-1 w-3 ml-10 mt-0">
+        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+        <span className="relative inline-flex rounded-full h-3 w-3 bg-green-400"></span>
+      </span>{" "}
+      <div className="flex items-center  w-12 h-12 mr-2 ml-10">
+        <img src={user?.avatarUrl} alt="" className="rounded-3xl" />
+        <span className="text-white font-bold  opacity-90 ml-10">
+          {user?.username}
+        </span>
       </div>
-
       {/* members */}
       <h3 className=" font-light text-white pl-10 py-10 opacity-50">
         # Members
       </h3>
       {/* icon is online   */}
-<span className="relative flex h-1 w-3 ml-10 mt-0">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-3 w-3 bg-green-400"></span>
-                  </span>      <div className="flex  items-center w-12 h-12 mr-2 ml-10">
-        <img
-          src={user?.avatarUrl}
-          alt=""
-          className="rounded-3xl"
-        />
-        <span className="text-white font-bold  opacity-90 ml-10">{user?.username}</span>
+      <span className="relative flex h-1 w-3 ml-10 mt-0">
+        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+        <span className="relative inline-flex rounded-full h-3 w-3 bg-green-400"></span>
+      </span>{" "}
+      <div className="flex  items-center w-12 h-12 mr-2 ml-10">
+        <img src={user?.avatarUrl} alt="" className="rounded-3xl" />
+        <span className="text-white font-bold  opacity-90 ml-10">
+          {user?.username}
+        </span>
         <button className="pl-8">
           <svg
             width="31"

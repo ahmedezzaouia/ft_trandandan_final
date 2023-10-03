@@ -1,29 +1,29 @@
 import socket from "@/services/socket";
 import { useEffect, useState } from "react";
+import  {useIsDirectMessage}  from "@/store/userStore";
 
-export default function ListUsersFriends({ username, directMessage, setDirectMessage }) {
-  
-
+export default function ListUsersFriends({ username } : { username: any}) {
   // request to get all users
   const [users, setUsers] = useState([]);
+  const {isDirectMessage, setIsDirectMessage} = useIsDirectMessage();
 
   // get all users
   useEffect(() => {
     socket.emit("getAllUsers");
     socket.on("getAllUsers", (data) => {
-        setUsers(data); 
+      setUsers(data);
     });
   }, []);
 
   let newArray = [];
-  newArray = users.filter((user) => user.username !== username);
-
+  newArray = users.filter((user : any)  => user.username === username);
 
   return (
     <>
-      {newArray.map((user, index) => (
+      {newArray.map((user : any, index) => (
         <div
           className="flex items-center py-2  hover:bg-slate-700 rounded-2xl cursor-pointer"
+          key={index}
         >
           <span className="relative flex h-1 w-3 ml-10 mr-3  -mt-10">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
@@ -31,7 +31,7 @@ export default function ListUsersFriends({ username, directMessage, setDirectMes
           </span>
           <div
             className="flex flex-col items-center  w-16 h-16 mr-2"
-            onClick={() => setDirectMessage(true)}
+            onClick={() => setIsDirectMessage(true)}
           >
             <div
               className="flex items-center p-2 space-x-4  cursor-pointer rounded-xl"
