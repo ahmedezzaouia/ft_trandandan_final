@@ -9,7 +9,7 @@ import { ChatService } from './chat.service';
 import { Server, Socket } from 'socket.io';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { channelService } from './channel.service';
-import { channel } from 'diagnostics_channel';
+import { directMessageService } from './directMessage.service';
 
 @WebSocketGateway({
   cors: {
@@ -22,6 +22,7 @@ export class ChatGateway {
 
   constructor(
     private readonly chatService: ChatService,
+    private readonly directMessageService: directMessageService,
     private readonly channelService: channelService,
     private readonly prisma: PrismaService,
   ) {}
@@ -149,8 +150,67 @@ export class ChatGateway {
         channel: true,
       },
     });
-    console.log('users', users);
+    // console.log('users', users);
     this.server.emit('getAllUsers', users);
     return users;
+  }
+
+
+  // directMessage
+  @SubscribeMessage('directMessage')
+  async directMessage(
+    @MessageBody()
+    data: {
+      sender: string;
+      reciever: string;
+      message: string;
+    },
+    @ConnectedSocket() client: Socket,
+  ) {
+    const saveMessage = await this.directMessageService.createDirectMessage(data);
+    this.server.to(data.reciever).emit('directMessage', saveMessage);
+    return saveMessage;
+  }
+
+  // listDirectMessages for a both users
+  @SubscribeMessage('listDirectMessages')
+  async listDirectMessages(
+    @MessageBody()
+    data: {
+      sender: string;
+      reciever: string;
+    },
+    @ConnectedSocket() client: Socket,
+  ) {
+    try {
+      // save the messages in an array where ChannelMessage is an object with the message and user
+      const messages = await this.directMessageService.listDirectMessages(data);
+
+      const user = await this.prisma.user.findUnique({
+        where: {
+          username: data.sender,
+        },
+      });
+
+      if (messages && messages.length > 0) {
+        let msg = [];
+        messages.forEach((element) => {
+          if (element.message) {
+            msg.push(element);
+          }
+        })
+        
+        this.server.emit('listDirectMessages', { msg });
+        console.log("🚀 ~ file: chat.gateway.ts:198 ~ ChatGateway ~ msg:", msg)
+        // return as array of objects
+        return msg;
+      } else {
+        console.error('No messages found.');
+        return []; // Return an empty array or handle it according to your application's logic
+      }
+    } catch (error) {
+      console.error('Error while fetching messages:', error);
+      throw error; // Rethrow the error to handle it in your calling code
+    }
   }
 }

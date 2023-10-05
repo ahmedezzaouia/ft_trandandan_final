@@ -3,35 +3,36 @@ import "./chatContent.css";
 
 import TopBar from "./topbar/topbar";
 
-import { useContext, useEffect } from "react";
+import { use, useEffect } from "react";
 import { useState } from "react";
 import socket from "@services/socket";
-import  {useIsDirectMessage}  from "@/store/userStore";
+import { useIsDirectMessage } from "@/store/userStore";
 import { useChannleStore } from "@/store/channelStore";
-
+import useRecieverStore from "@/store/recieverStore";
+import useMessageStore from "@/store/messagesStore";
 
 type User = {
   username: string;
   avatarUrl: string;
 };
 
-export default function ChatContent(
-  {user }: {user: any}
-  ) {
+export default function ChatContent({ user }: { user: any }) {
   const [messageInput, setMessageInput] = useState(""); // State for input field
-  const [recieverMessages, setRecieverMessages] = useState<{user: User, sender: string; channel: string; message: string }[]>([]);
-  const [senderMessages, setSenderMessages] = useState<{user: User, sender: string; channel: string; message: string }[]>([]);
+  const [recieverMessages, setRecieverMessages] = useState<
+    { user: User; sender: string; channel: string; message: string }[]
+  >([]);
+  const [senderMessages, setSenderMessages] = useState<
+    { user: User; sender: string; channel: string; message: string }[]
+  >([]);
   const [avaterUser, setAvaterUser] = useState("");
   const [NameUser, setNameUser] = useState("");
   const [avaterReciever, setAvaterReciever] = useState("");
   const [username, setUsername] = useState("");
-  // const [directMessage, setDirectMessage] = useState(false);
-  const {isDirectMessage, setIsDirectMessage} = useIsDirectMessage();
+  const { isDirectMessage, setIsDirectMessage } = useIsDirectMessage();
   const { channel, setChannel } = useChannleStore();
-
-  console.log("🚀 ~ onchat content", channel)
-
-
+  const { reciever, setReciever } = useRecieverStore();
+  // const [message, setMessage] = useState([]);
+  const { messages, setMessages } = useMessageStore();
 
   useEffect(() => {
     // Search for the username and set it in the state
@@ -66,27 +67,39 @@ export default function ChatContent(
     // Send the message input to the server
     if (messageInput === "") return;
 
-    console.log("username", username);
-    // isChannel ?
-    socket.emit("channelMessage", {
-      sender: username,
-      channel: channel,
-      message: messageInput,
-      // }) :
-      // socket.emit("directMessage", {
-      //   sender: user?.username,
-      //   message: messageInput,
-    });
+    if (!isDirectMessage) {
+      socket.emit("channelMessage", {
+        sender: username,
+        channel: channel,
+        message: messageInput,
+      });
+    } else {
+      socket.emit("directMessage", {
+        sender: username,
+        reciever: reciever,
+        message: messageInput,
+      });
+    }
     // Clear the input field after sending the message
 
     setRecieverMessages((prevMessages) => [
       ...prevMessages,
-      {user: user?.username, sender: user?.username, channel: channel, message: messageInput },
+      {
+        user: user?.username,
+        sender: user?.username,
+        channel: channel,
+        message: messageInput,
+      },
     ]);
 
     setSenderMessages((prevMessages) => [
       ...prevMessages,
-      {user: user?.username, sender: user?.username, channel: channel, message: messageInput },
+      {
+        user: user?.username,
+        sender: user?.username,
+        channel: channel,
+        message: messageInput,
+      },
     ]);
 
     // if (messageInput === "") return;
@@ -94,78 +107,104 @@ export default function ChatContent(
   };
 
   useEffect(() => {
-    // Check if username is defined and the channel is set
-    if (username || messageInput || channel) {
-      // Join the channel
-      socket.emit("joinChannel", { channel: channel });
+    console.log("reciever", reciever);
+    if (!isDirectMessage) {
+      if (username || messageInput || channel) {
+        // Join the channel
+        socket.emit("joinChannel", { channel: channel });
 
-      // Send event to get all messages from the channel
-      socket.emit("listChannelMessages", {
-        sender: username,
-        channel: channel,
-      });
-      // List all messages from the channel
-      socket.on("listChannelMessages", (data) => {
-        // Check if data.msg is an array before mapping
-        if (data.msg.length === 0) {
-          data.msg = [];
-          if (username === user?.username) {
-            setSenderMessages(data.msg);
-          }
-          setRecieverMessages(data.msg);
-        } else {
-          if (username === user?.username) {
-            setSenderMessages(data.msg);
-            setAvaterUser(data.msg[0].user.avatarUrl);
-            setNameUser(user?.username);
-            // clear the reciever messages
-            setRecieverMessages([]);
-          } else {
+        // Send event to get all messages from the channel
+        socket.emit("listChannelMessages", {
+          sender: username,
+          channel: channel,
+        });
+        // List all messages from the channel
+        socket.on("listChannelMessages", (data) => {
+          // Check if data.msg is an array before mapping
+          if (data.msg.length === 0) {
+            data.msg = [];
+            if (username === user?.username) {
+              setSenderMessages(data.msg);
+            }
             setRecieverMessages(data.msg);
-            setAvaterReciever(data.msg[0].user.avatarUrl);
-            setNameUser(user?.username);
-            // clear the sender messages
-            setSenderMessages([]);
+          } else {
+            if (username === user?.username) {
+              setSenderMessages(data.msg);
+              setAvaterUser(data.msg[0].user.avatarUrl);
+              setNameUser(user?.username);
+              // clear the reciever messages
+              setRecieverMessages([]);
+            } else {
+              setRecieverMessages(data.msg);
+              setAvaterReciever(data.msg[0].user.avatarUrl);
+              setNameUser(user?.username);
+              // clear the sender messages
+              setSenderMessages([]);
+            }
           }
-        }
+        });
+      }
+    } else 
+    {
+      socket.emit("listDirectMessages", {
+        sender: username,
+        reciever: reciever,
       });
+      socket.on("listDirectMessages", (data) => {
+        console.log("data", data);
+        let usernamerecieverBack = data.msg[0].receiver.username;
+        let usernamesenderBack = data.msg[0].sender.username;
+        usernamerecieverBack === username ? setMessages(data.msg) : null;
+        usernamesenderBack === username ? setMessages(data.msg) : null;
+        
 
-      return () => {
-        // Clean up event listeners or subscriptions related to this channel
-        socket.off("listChannelMessages");
-      };
+        // to avoid geting private between two users
+        if (usernamerecieverBack !== username && usernamesenderBack !== username) {
+          setMessages([]);
+        
+        }
+
+      
+      });
     }
-  }, [username, messageInput, channel]); // Re-run this effect when the username or channel changes
-  // todo remove this send message from useEffect
+
+    return () => {
+      // Clean up event listeners or subscriptions related to this channel
+      socket.off("listChannelMessages");
+      socket.off("listDirectMessages");
+    };
+  }, [username, channel, isDirectMessage, reciever]); // Re-run this effect when the username or channel changes
 
   return (
     <div className=" chat-content flex-1 flex flex-col overflow-hidden rounded-3xl shadow border border-gray-800 lg:max-w-screen-md">
-      {/* <!-- Top bar --> */}
       <TopBar user={user} username={username} />
 
       {/* <!-- Chat direct messages --> */}
       {isDirectMessage ? (
         <div className=" p-14 flex-1 overflow-auto">
-          {/* <!-- A sender message --> */}
-          <div className="flex items-start mb-4 text-sm">
-            <img src={
-              user?.avatarUrl
-            } className="w-10 h-10 rounded-full mr-3" />
-            <div className="flex-1 overflow-hidden">
-              <div className="flex justify-between">
-                <span className="font-bold text-white">{username}</span>
-                <span className="text-grey text-xs">12:45</span>
-              </div>
-              <p className="text-white leading-normal">
-                How are you doing joey?
-              </p>
-              <p className="text-white leading-normal">
-                {senderMessages.map((message, index) => (
-                  <p key={index}>{message.message}</p>
-                ))}
-              </p>
+          {
+            <div>
+              {messages.map((message: any, index) => (
+                <div key={index} className="flex flex-col mb-4 text-sm">
+                  <div className="flex items-center">
+                    <img
+                      src={message.sender.avatarUrl} // Assuming sender has an avatarUrl property
+                      className="w-10 h-10 rounded-full mr-3"
+                      alt={`Avatar of ${message.sender.username}`}
+                    />
+                    <span className="font-bold text-white">
+                      {message.sender.username}
+                    </span>
+                  </div>
+                  <p className="text-white font-sans px-14">
+                    <span className="text-white font-sans">
+                      {message.message}
+                    </span>
+                  </p>
+                </div>
+              ))}
             </div>
-          </div>
+          }
           {/* <!-- A response message --> */}
         </div>
       ) : (

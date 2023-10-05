@@ -17,7 +17,6 @@ enum UserStatus {
   IN_GAME
 }
 
-
 model User {
   id                  String  @id @default(uuid())
   username            String  @unique
@@ -28,6 +27,8 @@ model User {
   status              UserStatus @default(OFFLINE)
   channel             Channel[]
   channelMessage      ChannelMessage[]
+  sentDirectMessages  DirectMessage[] @relation("sender")
+  receivedDirectMessages DirectMessage[] @relation("receiver")
 }
 
 model Channel {
@@ -40,7 +41,6 @@ model Channel {
   user      User    @relation(fields: [userId], references: [id])
 }
 
-
 model ChannelMessage {
   id        String  @id @default(uuid())
   message   String
@@ -51,3 +51,15 @@ model ChannelMessage {
   userId    String  // Reference to the user who created the message
   user      User    @relation(fields: [userId], references: [id])
 }
+
+model DirectMessage {
+  id        String  @id @default(uuid())
+  message   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  senderId  String
+  sender    User      @relation("sender", fields: [senderId], references: [id])
+  receiverId String
+  receiver  User      @relation("receiver", fields: [receiverId], references: [id])
+}
+
