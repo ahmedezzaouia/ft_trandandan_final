@@ -17,7 +17,7 @@ export class Passport42Strategy extends PassportStrategy(Strategy, '42') {
       clientID:
         'u-s4t2ud-69cf4c0bf6a674947e3049c4166b5a8f70a36a211624e67a0fc755eac6baa7c4',
       clientSecret:
-        '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',
+        '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',
       callbackURL: 'http://localhost:3001/auth/callback',
     });
   }

@@ -84,15 +84,17 @@ export class channelService {
         username: data.sender,
       },
     });
+    if (!user) {
+      throw new Error('User not found');
+    }
     const channelId = await this.prisma.channel.findUnique({
       where: {
         name: data.channel,
         // userId: user.id,
       },
     });
-
-    if (!user) {
-      throw new Error('User not found');
+    if (!channelId) {
+      throw new Error('Channel not found');
     }
 
     // list all messages for a channel

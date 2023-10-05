@@ -82,25 +82,25 @@ export default function ChatContent({ user }: { user: any }) {
     }
     // Clear the input field after sending the message
 
-    setRecieverMessages((prevMessages) => [
-      ...prevMessages,
-      {
-        user: user?.username,
-        sender: user?.username,
-        channel: channel,
-        message: messageInput,
-      },
-    ]);
+    // setRecieverMessages((prevMessages) => [
+    //   ...prevMessages,
+    //   {
+    //     user: user?.username,
+    //     sender: user?.username,
+    //     channel: channel,
+    //     message: messageInput,
+    //   },
+    // ]);
 
-    setSenderMessages((prevMessages) => [
-      ...prevMessages,
-      {
-        user: user?.username,
-        sender: user?.username,
-        channel: channel,
-        message: messageInput,
-      },
-    ]);
+    // setSenderMessages((prevMessages) => [
+    //   ...prevMessages,
+    //   {
+    //     user: user?.username,
+    //     sender: user?.username,
+    //     channel: channel,
+    //     message: messageInput,
+    //   },
+    // ]);
 
     // if (messageInput === "") return;
     setMessageInput("");

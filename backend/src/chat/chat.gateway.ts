@@ -16,6 +16,7 @@ import { directMessageService } from './directMessage.service';
     origin: '*',
   },
 })
+
 export class ChatGateway {
   @WebSocketServer()
   server: Server;
@@ -213,4 +214,57 @@ export class ChatGateway {
       throw error; // Rethrow the error to handle it in your calling code
     }
   }
+
+
+  // search for a user
+  @SubscribeMessage('searchUser')
+  async searchUser(
+    @MessageBody()
+    data: {
+      user: string;
+    },
+    @ConnectedSocket() client: Socket,
+  ) {
+    try {
+      console.log("user search", data.user)
+      const user = await this.prisma.user.findMany({
+        where: {
+          username: {
+            contains: data.user,
+          },
+        },
+      });
+      this.server.emit('searchUser', user); // this will return all users
+      console.log("🚀 ~ file: chat.gateway.ts:237 ~ ChatGateway ~ user:", user)
+      return user;
+    } catch (error) {
+      console.error('Error while fetching messages:', error);
+      throw error; // Rethrow the error to handle it in your calling code
+    }
+  }
+
+  // get userid
+  // @SubscribeMessage('getUserId')
+  // async getUserId(
+  //   @MessageBody()
+  //   data: {
+  //     user: string;
+  //   },
+  //   @ConnectedSocket() client: Socket,
+  // ) {
+  //   try {
+  //     console.log("user search", data.user)
+  //     const user = await this.prisma.user.findUnique({
+  //       where: {
+  //         username: data.user,
+  //       },
+  //     });
+  //     this.server.emit('getUserId', user); // this will return all users
+  //     console.log("🚀 ~ file: chat.gateway.ts:237 ~ ChatGateway ~ user:", user)
+  //     return user;
+  //   } catch (error) {
+  //     console.error('Error while fetching messages:', error);
+  //     throw error; // Rethrow the error to handle it in your calling code
+  //   }
+  // }
 }
