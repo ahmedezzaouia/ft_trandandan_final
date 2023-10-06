@@ -173,7 +173,7 @@ export default function ChatContent({ user }: { user: any }) {
       socket.off("listChannelMessages");
       socket.off("listDirectMessages");
     };
-  }, [username, channel, isDirectMessage, reciever]); // Re-run this effect when the username or channel changes
+  }, [username, channel, isDirectMessage, reciever, sendMessage]); // Re-run this effect when the username or channel changes
 
   return (
     <div className=" chat-content flex-1 flex flex-col overflow-hidden rounded-3xl shadow border border-gray-800 lg:max-w-screen-md">

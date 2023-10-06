@@ -17,6 +17,7 @@ enum UserStatus {
   IN_GAME
 }
 
+
 model User {
   id                  String  @id @default(uuid())
   username            String  @unique
@@ -29,6 +30,10 @@ model User {
   channelMessage      ChannelMessage[]
   sentDirectMessages  DirectMessage[] @relation("sender")
   receivedDirectMessages DirectMessage[] @relation("receiver")
+  friends             Friends[] @relation("friendsUser")
+  senderRequests      FriendRequest[] @relation("senderRequests")
+  receiverRequests    FriendRequest[] @relation("receiverRequests")
+  notifications       Notification[]
 }
 
 model Channel {
@@ -48,7 +53,7 @@ model ChannelMessage {
   updatedAt DateTime @updatedAt
   channelId String
   channel   Channel @relation(fields: [channelId], references: [id])
-  userId    String  // Reference to the user who created the message
+  userId    String
   user      User    @relation(fields: [userId], references: [id])
 }
 
@@ -58,8 +63,36 @@ model DirectMessage {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   senderId  String
-  sender    User      @relation("sender", fields: [senderId], references: [id])
+  sender    User      @relation("sender", fields : [senderId], references: [id])
   receiverId String
   receiver  User      @relation("receiver", fields: [receiverId], references: [id])
 }
 
+model FriendRequest {
+  id        String  @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  status    String // "pending", "accepted", "rejected"
+  senderId  String
+  receiverId String
+  senderRequests    User      @relation("senderRequests", fields: [senderId], references: [id])
+  receiverRequests  User      @relation("receiverRequests", fields: [receiverId], references: [id])
+}
+
+model Notification {
+  id        String  @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  content   String
+  userId    String
+  user      User    @relation(fields: [userId], references: [id])
+}
+
+model Friends {
+  id        String  @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  status    String // "pending", "accepted", "rejected"
+  receiverId String
+  friend    User      @relation("friendsUser", fields: [receiverId], references: [id])
+}

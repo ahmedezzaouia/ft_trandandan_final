@@ -2,6 +2,7 @@ import React from "react";
 import "./profileCover.css";
 
 import Image from "next/image";
+import AddFriends from "./invitations/addFriends";
 
 interface ProfileCoverProps {
   user: any;
@@ -46,7 +47,7 @@ const ProfileCover = ({ user }: ProfileCoverProps) => {
             </p>
           </div>
         </div>
-        <button className="add-friend-btn p-2 p px-4 text-xs text-white  rounded-full">Add Friend</button>
+        <AddFriends/>
       </div>
     </section>
   );

@@ -1,6 +1,6 @@
 "use client";
 import "./chat.css";
-import React from "react";
+import React, { useEffect } from "react";
 import ChannalAndDirectMessage from "@/components/chat/channal&MessageList/channal&directMessage";
 import ChatContent from "@/components/chat/chatContent/chatContent";
 import AdminsMembers from "@/components/chat/adminMembers/adminMembers";
@@ -8,6 +8,7 @@ import AdminsMembers from "@/components/chat/adminMembers/adminMembers";
 import { useParams } from "next/navigation";
 import { fetchUser } from "@/services/userServices";
 import useSWR from "swr";
+import useUsernameStore from "@/store/usernameStore";
 
 
 export default function DirectMessage() {
@@ -18,6 +19,7 @@ export default function DirectMessage() {
     `http://localhost:3001/user/${userId}`,
     fetchUser
   );
+
 
 
   

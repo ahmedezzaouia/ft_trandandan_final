@@ -10,6 +10,7 @@ import { Server, Socket } from 'socket.io';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { channelService } from './channel.service';
 import { directMessageService } from './directMessage.service';
+import { notificationService } from './notification.service';
 
 @WebSocketGateway({
   cors: {
@@ -26,6 +27,7 @@ export class ChatGateway {
     private readonly directMessageService: directMessageService,
     private readonly channelService: channelService,
     private readonly prisma: PrismaService,
+    private readonly notificationService: notificationService,
   ) {}
 
   // channalMessage
@@ -243,28 +245,50 @@ export class ChatGateway {
     }
   }
 
-  // get userid
-  // @SubscribeMessage('getUserId')
-  // async getUserId(
-  //   @MessageBody()
-  //   data: {
-  //     user: string;
-  //   },
-  //   @ConnectedSocket() client: Socket,
-  // ) {
-  //   try {
-  //     console.log("user search", data.user)
-  //     const user = await this.prisma.user.findUnique({
-  //       where: {
-  //         username: data.user,
-  //       },
-  //     });
-  //     this.server.emit('getUserId', user); // this will return all users
-  //     console.log("🚀 ~ file: chat.gateway.ts:237 ~ ChatGateway ~ user:", user)
-  //     return user;
-  //   } catch (error) {
-  //     console.error('Error while fetching messages:', error);
-  //     throw error; // Rethrow the error to handle it in your calling code
-  //   }
-  // }
+
+  // add friend to user by id 
+  @SubscribeMessage('sendFriendRequest')
+  async sendFriendRequest(
+    @MessageBody()
+    data : {
+      reciverInvite: string;
+      senderIvite: string;
+    }
+  ) {
+    try {
+      if (!data.reciverInvite || !data.senderIvite) {
+  return;      }
+      // console.log("friend search", data.reciverInvite)
+      // console.log("friend search", data.senderIvite)
+      const friend = await this.notificationService.addFriend(data);
+      this.server.emit('sendFriendRequest', friend); // this will return all users
+      return friend;
+    }
+    catch (error) {
+      console.error('Error while fetching messages:', error);
+      throw error; // Rethrow the error to handle it in your calling code
+    }
+  }
+
+
+  // list all notification for a user
+  @SubscribeMessage('notification')
+  async listFriendRequest(
+    @MessageBody()
+    data : {
+      username: string;
+    }
+  ) {
+    try {
+      console.log("----", data.username)
+      const notification = await this.notificationService.listFriendRequest(data);
+      this.server.emit('notification', notification); // this will return all users
+      console.log("🚀 ~ file: chat.gateway.ts:237 ~ ChatGateway ~ user:", {notification})
+      return notification;
+    }
+    catch (error) {
+      console.error('Error while fetching messages:', error);
+      throw error; // Rethrow the error to handle it in your calling code
+    }
+  }
 }

@@ -6,6 +6,7 @@ export default function SearchResult({ searchResult, userId }: { searchResult: a
       // redirect to profile page
       console.log("userId", userId)
       window.location.href = `http://localhost:3000/profile/${userId}`
+      
     }
         
   return (
