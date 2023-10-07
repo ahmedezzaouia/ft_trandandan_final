@@ -6,15 +6,17 @@ export default function SearchBar() {
     const [input, setInput] = useState('')
     const [searchResult, setSearchResult] = useState([])
     const [userId, setUserId] = useState('')
+    const [user, setUsername] = useState('')
 
     // fetch data from backend
     const search = (e : any) => {
         setInput(e.target.value)
-        console.log("input", input)
+        setUsername(e.target.value)
+        console.log("username", user)
         if (input === '') {
             socket.emit('searchUser', '')
         }
-        socket.emit('searchUser', input)
+        socket.emit('searchUser', user)
         socket.on('searchUser', (data) => {
             // filter data and search for user
             const filteredData = data.filter((user : any) => {
@@ -24,8 +26,6 @@ export default function SearchBar() {
             const userId = filteredData[0]?.id;
             setSearchResult(filteredData)
             setUserId(userId)
-            console.log("userId1", userId)
-            console.log("filteredData", filteredData)
         })
 
         input === '' && setSearchResult([])

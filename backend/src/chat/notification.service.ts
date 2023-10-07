@@ -6,25 +6,23 @@ export class notificationService {
     constructor (private readonly prisma: PrismaService) {}
 
     // ------------------ add friend ------------------
-    async addFriend(data: { reciverInvite : string, senderIvite : string }) {
-        // console.log("----------------",data.reciverInvite)
-
+    async sendFriendRequest(data: { receiverInvite : string, senderInvite : string }) {
         try{
             const senderUser = await this.prisma.user.findUnique({
                 where: {
-                    username: data.senderIvite,
+                    username: data.senderInvite,
                 },
             });
             // console.log("senderUser",senderUser)
 
             const reciverUser = await this.prisma.user.findUnique({
                 where: {
-                    id: data.reciverInvite,
+                    id: data.receiverInvite,
                 },
             });
 
             // console.log("reciverUser",reciverUser)
-            // check if the user is already send a friend request
+            // check if the user is already a friend to each other
             const friendRequest = await this.prisma.friendRequest.findFirst({
                 where: {
                     senderId: senderUser.id,
@@ -32,7 +30,6 @@ export class notificationService {
                 },
             });
             if (friendRequest) {
-                // console.log("friendRequest alredy exist",friendRequest)
                 return friendRequest;
             }
 
@@ -77,12 +74,68 @@ export class notificationService {
                     },
                 },
             });
-            console.log("user",user)
+            // console.log("user",user)
             return user;
         }
         catch(err){
             throw err;
         }
         
+    }
+
+
+    // ------------------ accept friend ------------------
+    async acceptFriendRequest(data: { sender : string, receiver : string }) {
+
+        try{
+            const senderUser = await this.prisma.user.findUnique({
+                where: {
+                    username: data.sender,
+                },
+            });
+            // console.log("senderUser",senderUser)
+
+            const reciverUser = await this.prisma.user.findUnique({
+                where: {
+                    username: data.receiver,
+                },
+            });
+
+            // check if the user is already are friend to each other
+            const isfriend = await this.prisma.friends.findFirst({
+                where: {
+                    senderId: senderUser.id,
+                    receiverId: reciverUser.id,
+                },
+            });
+
+            if (isfriend) {
+                console.log("friendRequest alredy frineds",isfriend)
+                return isfriend;
+            }
+
+
+            const friend = await this.prisma.friends.create({
+                data: {
+                    user: {
+                        connect: {
+                            id: senderUser.id,
+                        },
+                    },
+                    friend: {
+                        connect: {
+                            id: reciverUser.id,
+                        },
+                    },
+                    status: "accepted",
+                },
+            });
+
+            console.log("friend",friend)
+            return friend;
+        }
+        catch(err){
+            throw err;
+        }
     }
 }

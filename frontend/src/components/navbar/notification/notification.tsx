@@ -1,5 +1,4 @@
 import socket from "@/services/socket";
-import { data } from "autoprefixer";
 import { useState, useEffect } from "react";
 
 const Notification = ({ user }: { user: any }) => {
@@ -8,16 +7,11 @@ const Notification = ({ user }: { user: any }) => {
   const [senderUsername, setSenderUsername] = useState("");
 
   useEffect(() => {
-    socket.on("notification", (data) => {
-      console.log("notification-------------------", data);
-      
+    socket.on("notification", (data) => {      
       // save data to state as array
         setSender((sender) => [...sender, data]);
-
-        // filter sender username
+        // save username to state
         setSenderUsername(data.username);
-        console.log("senderUsername-------------------", sender[0]);
-        console.log("sender-------------------", data.username);
     });
 
 
@@ -26,6 +20,25 @@ const Notification = ({ user }: { user: any }) => {
       socket.off("notification");
     };
   }, []);
+
+
+  const saveFriendsToDB = async (senderUsername: string) => {
+    console.log("who send requset ", senderUsername);
+    console.log("who recieve requset", user.username);
+
+    // add sender to reciever friends list
+    socket.emit("acceptFriendRequest", {
+      sender: senderUsername,
+      receiver: user.username,
+    });
+
+    socket.on("acceptFriendRequest", (data) => {
+      console.log("acceptFriendRequest", data);
+    });
+    
+    // display none notification
+    setNotification(!notification);
+  };
 
   return (
     <>
@@ -47,8 +60,8 @@ const Notification = ({ user }: { user: any }) => {
               d="M8 3.464V1.1m0 2.365a5.338 5.338 0 0 1 5.133 5.368v1.8c0 2.386 1.867 2.982 1.867 4.175C15 15.4 15 16 14.462 16H1.538C1 16 1 15.4 1 14.807c0-1.193 1.867-1.789 1.867-4.175v-1.8A5.338 5.338 0 0 1 8 3.464ZM4.54 16a3.48 3.48 0 0 0 6.92 0H4.54Z"
             />
           </svg>
-          {!notification &&  user.username !== senderUsername && (
-            <div className="absolute top-0 right-0 w-48 p-2 mt-12 bg-white rounded-md shadow-xl dark:bg-gray-800">
+          {!notification &&  user?.username !== senderUsername && (
+            <div className="absolute top-0 right-0 w-64 p-2 mt-12 bg-white rounded-md shadow-xl dark:bg-gray-800">
                 {
                 sender.map((sender) => (
                     <div className="flex items-center justify-between mt-2">
@@ -63,7 +76,9 @@ const Notification = ({ user }: { user: any }) => {
                         </p>
                     </div>
                     <div className="flex items-center">
-                        <button className="px-2 py-1 mr-2 text-xs text-green-600 bg-gray-200 rounded-md dark:bg-gray-700 dark:text-green-400">
+                        <button className="px-2 py-1 mr-2 text-xs text-green-600 bg-gray-200 rounded-md dark:bg-gray-700 dark:text-green-400"
+                        onClick={() => {saveFriendsToDB(sender.username)}}
+                        >
                         Accept
                         </button>
                         <button className="px-2 py-1 text-xs text-red-600 bg-gray-200 rounded-md dark:bg-gray-700 dark:text-red-400">

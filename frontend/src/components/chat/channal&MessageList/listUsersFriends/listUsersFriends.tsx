@@ -3,30 +3,113 @@ import { useEffect, useState } from "react";
 import  {useIsDirectMessage}  from "@/store/userStore";
 import  useRecieverStore  from "@/store/recieverStore";
 import useMessageStore from "@/store/messagesStore";
+import { fetchUser } from "@/services";
+
 export default function ListUsersFriends({ username } : { username: any}) {
   // request to get all users
   const [users, setUsers] = useState([]);
   const {isDirectMessage, setIsDirectMessage} = useIsDirectMessage();
   const { reciever, setReciever } = useRecieverStore();
   const {messages, setMessages } = useMessageStore();
+  const [friendsId, setFriendsId] = useState([]);
+  const [UserName, setUserName] = useState("");
 
-  // get all users
-  useEffect(() => {
-    socket.emit("getAllUsers");
-    socket.on("getAllUsers", (data) => {
-      setUsers(data);
+
+
+// fetch username from session storage
+const fetchUserName = async () => {
+  const storedUserData = sessionStorage.getItem("user-store");
+  if (storedUserData) {
+    try {
+      // Parse the stored data as JSON
+      const userData = await JSON.parse(storedUserData);
+
+      // Access the username property
+      const savedUsername = userData.state.user.username;
+
+      setUserName(savedUsername);
+    } catch (error) {
+      console.error("Error parsing stored data:", error);
+    }
+  } else {
+    console.warn("User data not found in session storage.");
+  }
+};
+
+  // Define a function to copy users to friendsArray
+
+// Define a function to compare friendsId with all users id
+const comparingFriends = () => {
+  socket.emit("getAllUsersFriends", {sender: username});
+  socket.on("getAllUsersFriends", (data) => {
+    // console.log("data", data);
+    let friendsArray = [...data.map((user : any) => user.receiverId)];
+    setFriendsId(friendsArray as any);
+    // console.log("friendsArray2", friendsArray);
+  }
+  );
+};
+
+// Define a function to get real friends by id
+const getRealFriendsById = () => {
+  if (friendsId.length > 0) {
+    friendsId.map((friendId : any) => {
+      socket.emit("getUserById", {id: friendId});
+      socket.on("getUserById", (data) => {
+        let newArray = [];
+        newArray = [...users, data];
+        if (newArray.length > 0) {
+          newArray = newArray.filter((user : any) => user.username !== username);  // remove yourself from the list
+          // avoid duplicate users
+          newArray = newArray.filter((user : any, index : any, self : any) =>
+            index === self.findIndex((t : any) => (
+              t.username === user.username
+            ))
+          );
+        }
+        setUsers(newArray as any);
+      });
     });
-  }, []);
+  }
+}
 
-  let newArray = [];
-  newArray = users.filter((user : any)  => user.username !== username);
+
+
+// get all users
+useEffect(() => {
+  socket.emit("getAllUsers");
+  socket.on("getAllUsers", (data) => {
+    // Filter out duplicate users based on username
+    const uniqueUsers = data.filter((user : any) => user.username !== username);
+    // console.log("users", uniqueUsers);
+    let newArray = [];
+    newArray = uniqueUsers.filter((user : any)  => user.username !== username);
+    setUsers(newArray);
+  });
+
+  return () => {
+    // Clean up any event listeners or subscriptions
+    socket.off("getAllUsers");
+  };
+}, []);
+
+
+
+// Use useEffect with users as a dependency to trigger the copy operation
+useEffect(() => {
+  fetchUserName();
+  comparingFriends();
+  getRealFriendsById();
+}, [
+  users, friendsId
+]);
+
 
 
   // save the reciever name
   const saveReceiverName = (username: string) => {
     setReciever(username);
     setIsDirectMessage(true);
-    console.log("**********");
     socket.emit("listDirectMessages", { sender: username, reciever: reciever });
     socket.on("listDirectMessages", (data) => {
       setMessages(data);
@@ -34,9 +117,11 @@ export default function ListUsersFriends({ username } : { username: any}) {
     });
   };
 
+  let usersArray = [...users];
+
   return (
     <>
-      {newArray.map((user : any, index) => (
+      {usersArray.map((user : any, index) => (
         <div
           className="flex items-center py-2  hover:bg-slate-700 rounded-2xl cursor-pointer"
           key={index}

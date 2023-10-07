@@ -94,7 +94,8 @@ export class channelService {
       },
     });
     if (!channelId) {
-      throw new Error('Channel not found');
+      // throw new Error('Channel not found');
+      return;
     }
 
     // list all messages for a channel
