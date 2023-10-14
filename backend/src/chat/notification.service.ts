@@ -74,7 +74,7 @@ export class notificationService {
                     },
                 },
             });
-            // console.log("user",user)
+            // console.log("list friends ",user)
             return user;
         }
         catch(err){
@@ -104,8 +104,7 @@ export class notificationService {
             // check if the user is already are friend to each other
             const isfriend = await this.prisma.friends.findFirst({
                 where: {
-                    senderId: senderUser.id,
-                    receiverId: reciverUser.id,
+                    friendId: senderUser.id,
                 },
             });
 
@@ -117,11 +116,17 @@ export class notificationService {
 
             const friend = await this.prisma.friends.create({
                 data: {
-                    user: {
+                    friend: {
                         connect: {
                             id: senderUser.id,
                         },
                     },
+                    status: "accepted",
+                },
+            });
+
+            const addFriendToRecieverTo = await this.prisma.friends.create({
+                data: {
                     friend: {
                         connect: {
                             id: reciverUser.id,
@@ -131,7 +136,6 @@ export class notificationService {
                 },
             });
 
-            console.log("friend",friend)
             return friend;
         }
         catch(err){

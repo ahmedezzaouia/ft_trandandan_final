@@ -43,9 +43,6 @@ export default function AddFriends() {
 }, []);
 
 
-  console.log("receiver", receiver);
-  console.log("username", username);
-
 
   const sendFriendRequest = async () => {
     try {
@@ -55,11 +52,9 @@ export default function AddFriends() {
           senderInvite: username,
         });
 
-        console.log("sendFriendRequest", userId, username);
 
         // get name of user
         socket.on("sendFriendRequest", (data) => {
-          console.log("data recieved ",data);
           const receiverId = data.receiverId;
           const senderId = data.senderId;
           setceiverId(receiverId);

@@ -6,16 +6,18 @@ import socket from "@/services/socket";
 import ListUsersFriends from "./listUsersFriends/listUsersFriends";
 import { useIsDirectMessage } from "@/store/userStore";
 import useIsChannel from "@/store/channelStore";
-import { useChannleStore } from "@/store/channelStore";
+import { useChannleTypeStore } from "@/store/channelStore";
 
 export default function ChannalAndDirectMessage({ user }: { user: any }) {
 
   const { isDirectMessage, setIsDirectMessage } = useIsDirectMessage();
   const { isChannel, setIsChannel } = useIsChannel();
 
-  const { channel, setChannel } = useChannleStore();
+  const { channel, setChannel } = useChannleTypeStore();
   const [channels, setChannels] = useState<string[]>([]);
   const [username, setUsername] = useState("");
+  const [invite, setInvite] = useState(false);
+  const [users, setUsers] = useState<any[]>([]);
 
   // This function will be passed as a prop to Child1
   const addChannel = (channelName: any) => {
@@ -24,6 +26,7 @@ export default function ChannalAndDirectMessage({ user }: { user: any }) {
     if (username !== "") {
       socket.emit("saveChannelName", {
         channel: channelName,
+        channelType: channel,
         sender: username,
       });
     }
@@ -89,6 +92,20 @@ export default function ChannalAndDirectMessage({ user }: { user: any }) {
     setChannel("general");
   }
 
+  const InviteToChannel = (channelName: any) => {
+    setInvite(!invite);
+    socket.emit("getAllUsers", {sender: username});
+    socket.on("getAllUsers", (data) => {
+      setUsers(data);
+      console.log("getAllUsers", data);
+    });
+    socket.emit("inviteToChannel", {
+      channel: channelName,
+      sender: username,
+    });
+    console.log("inviteToChannel", channelName);
+  }
+
   return (
     <div className="list-div bg-slate-900 mr-10 ml-10 text-purple-lighter  w-80  hidden lg:block rounded-2xl overflow-hidden border border-gray-800">
       {/* <!-- Sidebar Header --> */}
@@ -126,7 +143,12 @@ export default function ChannalAndDirectMessage({ user }: { user: any }) {
           className="bg-teal-dark py-4 px-4 text-gray-400 font-bold  hover:bg-slate-700 hover:text-white hover:opacity-100 rounded-2xl cursor-pointer"
           onClick={() => setChannalPageAndSavedefaultName()}
         >
-          # general
+          <div className="flex justify-between">
+            <p>
+              # general
+            </p>
+          </div>
+
         </div>
         <ul>
           {channels.map((channelName, index) => (
@@ -135,15 +157,58 @@ export default function ChannalAndDirectMessage({ user }: { user: any }) {
               key={index}
               onClick={() => switchChannelName(channelName)}
             >
-              # {channelName}
+
+              <div className="flex justify-between">
+                <p>
+                  # {channelName}
+                </p>
+                <span
+                onClick={() => InviteToChannel(channelName)}
+                ><svg className="w-4 h-4 text-gray-500 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 18">
+                  <path d="M6.5 9a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9ZM8 10H5a5.006 5.006 0 0 0-5 5v2a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-2a5.006 5.006 0 0 0-5-5Zm11-3h-2V5a1 1 0 0 0-2 0v2h-2a1 1 0 1 0 0 2h2v2a1 1 0 0 0 2 0V9h2a1 1 0 1 0 0-2Z" />
+                </svg>
+                </span>
+              </div>
             </li>
           ))}
         </ul>
+          {
+            invite && (
+              // add menu card to list all users to invite
+              <>
+                <div className="rounded-xl border border-gray-600 my-3">
+                {
+                  users.map((user, index) => {
+                    return (
+                      // display all users on middle of screen
+                      <div className="flex justify-between items-center space-x-2 py-2  cursor-pointer 
+                      px-4 mb-2 text-white 
+                      " key={index}
+                      >
+                        <div className="flex  py-2 text-white font-bold cursor-pointer rounded-lg shadow-lg bg-backgroundColorPrimery border-gray-600 hover:bg-slate-900 hover:text-green-300">
+                        <img src={user.avatarUrl} alt="user" className="w-8 h-8 mr-5 rounded-full" />
+                          <p>{user.username}</p>
+                        </div>
+                        <button
+                          className="bg-red-500 hover:bg-red-700 text-white font-thin px-8 ml-2 rounded-full py-2 "
+                          onClick={() => InviteToChannel(channel)}
+                        >
+                          invite
+                        </button>
+                      </div>
+                    );
+                  },)
+                }
+                  
+                </div>
+              </>
+            )
+          }
       </div>
 
       {/* direct messages */}
 
-      <div className="mb-8">
+      <div className="mb-[420px]">
         <div className="px-4 mb-2 text-white flex justify-between items-center">
           <span
             className="opacity-40 text-white font-thin shadow-lg 
@@ -154,6 +219,11 @@ export default function ChannalAndDirectMessage({ user }: { user: any }) {
         </div>
         <ListUsersFriends username={username} />
       </div>
+      <button
+         className="bg-red-500 hover:bg-red-700 text-white font-thin px-20 ml-6 rounded-full py-2 "
+         >
+          leave channel
+         </button>
     </div>
   );
 }

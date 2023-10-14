@@ -11,6 +11,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { channelService } from './channel.service';
 import { directMessageService } from './directMessage.service';
 import { notificationService } from './notification.service';
+import { emit } from 'process';
 
 @WebSocketGateway({
   cors: {
@@ -27,7 +28,7 @@ export class ChatGateway {
     private readonly channelService: channelService,
     private readonly prisma: PrismaService,
     private readonly notificationService: notificationService,
-  ) {}
+  ) { }
 
   // channalMessage
   @SubscribeMessage('channelMessage')
@@ -98,6 +99,7 @@ export class ChatGateway {
     @MessageBody()
     data: {
       channel: string;
+      channelType: string;
       sender: string;
     },
     @ConnectedSocket() client: Socket,
@@ -119,6 +121,7 @@ export class ChatGateway {
     const saveChannel = await this.prisma.channel.create({
       data: {
         name: data.channel,
+        visibility: data.channelType,
         user: {
           connect: {
             username: user.username,
@@ -193,7 +196,7 @@ export class ChatGateway {
           username: data.sender,
         },
       });
-
+      
       if (messages && messages.length > 0) {
         let msg = [];
         messages.forEach((element) => {
@@ -201,9 +204,7 @@ export class ChatGateway {
             msg.push(element);
           }
         });
-
         this.server.emit('listDirectMessages', { msg });
-        console.log('🚀 ~ file: chat.gateway.ts:198 ~ ChatGateway ~ msg:', msg);
         // return as array of objects
         return msg;
       } else {
@@ -253,8 +254,6 @@ export class ChatGateway {
     },
   ) {
     try {
-      console.log('friend search', data.receiverInvite);
-      console.log('friend search', data.senderInvite);
       if (!data.receiverInvite || !data.senderInvite) {
         return;
       }
@@ -318,6 +317,9 @@ export class ChatGateway {
     },
   ) {
     try {
+      if (!data.id) {
+        return;
+      }
       console.log('----', data.id);
       const user = await this.prisma.user.findUnique({
         where: {
@@ -341,15 +343,17 @@ export class ChatGateway {
       sender: string;
     },
   ) {
+    console.log('----', data.sender);
     try {
       const friends = await this.prisma.friends.findMany({
         where: {
-          user: {
+          friend: {
             username: data.sender,
           },
         },
       });
 
+      console.log("friends", friends);
       this.server.emit('getAllUsersFriends', friends); // this will return all users
       return friends;
     } catch (error) {
@@ -357,5 +361,91 @@ export class ChatGateway {
       throw error; // Rethrow the error to handle it in your calling code
     }
   }
+  // blockUser
+  @SubscribeMessage('blockUser')
+  async blockUser(
+    @MessageBody()
+    data: {
+      willbocked: string;
+      whoblocked: string;
+        },
+  ) {
+    try {
+      const user =  await this.prisma.user.findUnique({
+        where: {
+          username: data.whoblocked,
+        },
+      });
+      const check = await this.prisma.blockedUsers.findMany({
+        where: {
+          blocker: {
+            username: user.username,
+          },
+        },
+      });
 
+      // filter the blocked users if there is a duplicate console log it
+      const checkDuplicate = check.filter((el) => { return el.getblockedid === el.getblockedid });
+      if (checkDuplicate.length > 0) {
+        console.log('user already blocked');
+        return;
+      }
+
+      const blocked = await this.prisma.blockedUsers.create({
+        data: {
+          blocker: {
+            connect: {
+              username: user.username,
+            },
+          },
+          getblocked: {
+            connect: {
+              username: data.willbocked,
+            },
+          },
+        },
+      });
+            
+      console.log('blocked', blocked);
+      this.server.emit('blockUser', blocked); // this will return all users
+      return blocked;
+    } catch (error) {
+      console.error('Error while fetching messages:', error);
+      throw error; // Rethrow the error to handle it in your calling code
+    }
+  }
+
+
+  // getblockUser
+  @SubscribeMessage('getblockUser')
+  async getblockUser(
+    @MessageBody()
+    data: {
+      username: string;
+    },
+  ) {
+    try {
+      const user = await this.prisma.user.findUnique({
+        where: {
+          username: data.username,
+        },
+      });
+      const blocked = await this.prisma.blockedUsers.findMany({
+        where: {
+          blocker: {
+            username: user.username,
+          },
+        },
+      });
+      if (!blocked) {
+        console.log('no blocked users');
+      }
+      console.log('all users blocked', blocked);
+      this.server.emit('getblockUser', blocked); // this will return all users
+      return blocked;
+    } catch (error) {
+      console.error('Error while fetching user by id:', error);
+      throw error;
+    }
+  }
 }

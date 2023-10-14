@@ -11,9 +11,6 @@ export class directMessageService {
     reciever: string;
     message: string;
   }) {
-    console.log("🚀 ~ file: directMessage.service.ts:14 ~ directMessageService ~ message:", data.message)
-    console.log("🚀 ~ file: directMessage.service.ts:14 ~ directMessageService ~ reciever:", data.reciever)
-    console.log("🚀 ~ file: directMessage.service.ts:14 ~ directMessageService ~ sender:", data.sender)
 
     
     const user = await this.prisma.user.findUnique({
@@ -57,27 +54,23 @@ export class directMessageService {
     reciever: string;
   }) {
     
-    console.log("sender in backend", data.sender)
-    console.log("reciever in backend", data.reciever)
     const user = await this.prisma.user.findUnique({
       where: {
         username: data.sender,
       },
     });
-    console.log("🚀 ~ file: directMessage.service.ts:67 ~ directMessageService ~ user:", user)
     
     const reciever = await this.prisma.user.findUnique({
       where: {
         username: data.reciever,
       },
     });
-    console.log("🚀 ~ file: directMessage.service.ts:74 ~ directMessageService ~ reciever:", reciever)
     
     if (!user) {
-      throw new Error('User not found');
+      console.log('User not found', user);
     }
     if (!reciever) {
-      throw new Error('reciever not found');
+      console.log('reciever not found', reciever);
     }
 
     // list both sender and reciever messages
@@ -109,7 +102,6 @@ export class directMessageService {
         sender: true,
         receiver: true,
       },
-      
     });
     return listDirectMessages;
   }

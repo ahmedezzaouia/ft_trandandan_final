@@ -28,8 +28,6 @@ export default function DirectMessage() {
       <div className="flex h-full">
         <ChannalAndDirectMessage
           user={user}
-          // isDirectMessage={isDirectMessage}
-          // setIsDirectMessage={setIsDirectMessage}
         />
         <ChatContent
           user={user}

@@ -15,11 +15,11 @@ const useIsChannel = create<IsChannelType>((set) => ({
         setChannel: (channel: string) => void;
       }
     // state to store the channel name
-    const useChannleStore = create<ChannelStoreType>((set) => ({
+    const useChannleTypeStore = create<ChannelStoreType>((set) => ({
         channel: "general",
         setChannel: (channel: string) => set({ channel }),
       }));
     
 
 export default useIsChannel;
-export  {useChannleStore};
+export  {useChannleTypeStore};

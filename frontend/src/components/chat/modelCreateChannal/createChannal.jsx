@@ -1,8 +1,11 @@
 import { useState } from "react";
+import { useChannleTypeStore } from "@/store/channelStore"
 
 export default function CreateChannal(props) {
   const [showModal, setShowModal] = useState(false);
   const [channelName, setChannelName] = useState('');
+  const { channel, setChannel } = useChannleTypeStore()
+  
 
 
   const handleInputChange = (event) => {
@@ -12,8 +15,14 @@ export default function CreateChannal(props) {
 
   const handleAddChannel = () => {
     // Call the addChannel function from props to pass the channelName to the main component
+    if (channelName === "" || channel === "") {
+      alert("Please enter fill required field");
+      return;
+    }
     props.addChannel(channelName);
     // Clear the input field
+    console.log("-------- channelType",channel)
+    console.log("-------- channelName",channelName)
     setChannelName('');
 
     // Close the modal
@@ -49,16 +58,22 @@ export default function CreateChannal(props) {
             {/* type of channel */}
             <div className="flex items-center">
               <div className="mx-5">
-                <input type="radio" name="type" value="public" />
-                <label className="text-white">Public</label>
+                <input type="radio" name="type" value="public" 
+                 onChange={(e) => setChannel("public")}
+                />
+                <label className="text-white px-3">Public</label>
               </div>
               <div>
-                <input type="radio" name="type" value="private" />
-                <label className="text-white">Private</label>
+                <input type="radio" name="type" value="private" 
+                  onChange={(e) => setChannel("private")}
+                />
+                <label className="text-white px-3">Private</label>
               </div>
               <div>
-                <input type="radio" name="type" value="protected" />
-                <label className="text-white">Protected</label>
+                <input type="radio" name="type" value="protected"
+                  onChange={(e) => setChannel("protected")}
+                 />
+                <label className="text-white px-3">Protected</label>
               </div>
             </div>
             <div className="flex justify-end mt-5">

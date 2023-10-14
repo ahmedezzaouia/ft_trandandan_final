@@ -3,11 +3,11 @@ import "./chatContent.css";
 
 import TopBar from "./topbar/topbar";
 
-import { use, useEffect } from "react";
+import { Key, use, useEffect } from "react";
 import { useState } from "react";
 import socket from "@services/socket";
 import { useIsDirectMessage } from "@/store/userStore";
-import { useChannleStore } from "@/store/channelStore";
+import { useChannleTypeStore } from "@/store/channelStore";
 import useRecieverStore from "@/store/recieverStore";
 import useMessageStore from "@/store/messagesStore";
 
@@ -29,10 +29,11 @@ export default function ChatContent({ user }: { user: any }) {
   const [avaterReciever, setAvaterReciever] = useState("");
   const [username, setUsername] = useState("");
   const { isDirectMessage, setIsDirectMessage } = useIsDirectMessage();
-  const { channel, setChannel } = useChannleStore();
+  const { channel, setChannel } = useChannleTypeStore();
   const { reciever, setReciever } = useRecieverStore();
-  // const [message, setMessage] = useState([]);
-  const { messages, setMessages } = useMessageStore();
+  const { messages, setMessages} = useMessageStore();
+  const [arrayMessages, setArrayMessages] = useState<any>([]);
+  const [isblockUser, setBlockUser] = useState(false);
 
   useEffect(() => {
     // Search for the username and set it in the state
@@ -80,29 +81,6 @@ export default function ChatContent({ user }: { user: any }) {
         message: messageInput,
       });
     }
-    // Clear the input field after sending the message
-
-    // setRecieverMessages((prevMessages) => [
-    //   ...prevMessages,
-    //   {
-    //     user: user?.username,
-    //     sender: user?.username,
-    //     channel: channel,
-    //     message: messageInput,
-    //   },
-    // ]);
-
-    // setSenderMessages((prevMessages) => [
-    //   ...prevMessages,
-    //   {
-    //     user: user?.username,
-    //     sender: user?.username,
-    //     channel: channel,
-    //     message: messageInput,
-    //   },
-    // ]);
-
-    // if (messageInput === "") return;
     setMessageInput("");
   };
 
@@ -145,28 +123,52 @@ export default function ChatContent({ user }: { user: any }) {
       }
     } else 
     {
-      socket.emit("listDirectMessages", {
-        sender: username,
-        reciever: reciever,
+      socket.emit("getblockUser",  {username: username});
+      socket.on("getblockUser", (data) => {
+        console.log("blockUser data", data);
+        const getblockedid = data.getblockedid;
+        console.log("getblockedid-----------", getblockedid);
+        socket.emit("getUserById", {id: getblockedid});
+        socket.on("getUserById", (data) => {
+          const getblockedname = data.username;
+          console.log("getblockedname", getblockedname);
+          if (getblockedname === reciever){
+            console.log("yeees");
+            setBlockUser(true);
+          }
+          else
+          {
+            setBlockUser(false);
+          }
+        });
       });
-      socket.on("listDirectMessages", (data) => {
-        console.log("data", data);
-        let usernamerecieverBack = data.msg[0].receiver.username;
-        let usernamesenderBack = data.msg[0].sender.username;
-        usernamerecieverBack === username ? setMessages(data.msg) : null;
-        usernamesenderBack === username ? setMessages(data.msg) : null;
-        
+      if (!isblockUser){
+        socket.emit("listDirectMessages", {
+          sender: username,
+          reciever: reciever,
+        });
+        socket.on("listDirectMessages", (data) => {
+          let usernamerecieverBack = data.msg[0].receiver.username;
+          let usernamesenderBack = data.msg[0].sender.username;
+          usernamerecieverBack === username ? setMessages(data.msg) : null;
+          usernamesenderBack === username ? setMessages(data.msg) : null;
+          
 
-        // to avoid geting private between two users
-        if (usernamerecieverBack !== username && usernamesenderBack !== username) {
-          setMessages([]);
-        
-        }
-
-      
-      });
+          // to avoid geting private between two users
+          if (usernamerecieverBack !== username && usernamesenderBack !== username) {
+            setMessages([]);
+          
+          }      
+        });
+      }
+      else
+      {
+        setMessages([]);
+        alert("you are blocked");
+      }
     }
 
+    setArrayMessages([...messages]);
     return () => {
       // Clean up event listeners or subscriptions related to this channel
       socket.off("listChannelMessages");
@@ -176,14 +178,14 @@ export default function ChatContent({ user }: { user: any }) {
 
   return (
     <div className=" chat-content flex-1 flex flex-col overflow-hidden rounded-3xl shadow border border-gray-800 lg:max-w-screen-md">
-      <TopBar user={user} username={username} />
+      <TopBar user={user} username={username} channel={channel} />
 
       {/* <!-- Chat direct messages --> */}
       {isDirectMessage ? (
         <div className=" p-14 flex-1 overflow-auto">
           {
             <div>
-              {messages.map((message: any, index) => (
+              {arrayMessages.map((message: any, index: Key | null | undefined) => (
                 <div key={index} className="flex flex-col mb-4 text-sm">
                   <div className="flex items-center">
                     <img
@@ -280,6 +282,7 @@ export default function ChatContent({ user }: { user: any }) {
           </span>
         </div>
       </div>
+      
     </div>
   );
 }

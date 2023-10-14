@@ -28,11 +28,13 @@ model User {
   channelMessage         ChannelMessage[]
   sentDirectMessages     DirectMessage[]  @relation("sender")
   receivedDirectMessages DirectMessage[]  @relation("receiver")
-  friendsSender          Friends[]        @relation("friendsSender")
-  friendsReceiver        Friends[]        @relation("friendReceiver")
+  friends                Friends[]        @relation("friends")
   senderRequests         FriendRequest[]  @relation("senderRequests")
   receiverRequests       FriendRequest[]  @relation("receiverRequests")
   notifications          Notification[]
+  blocker                BlockedUsers[]   @relation("blocker")
+  getblocked              BlockedUsers[]   @relation("Getblocked")
+
 }
 
 model Channel {
@@ -40,6 +42,8 @@ model Channel {
   name           String           @unique
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt
+  role           String           @default("owner")
+  visibility     String @default("public")
   ChannelMessage ChannelMessage[]
   userId         String
   user           User             @relation(fields: [userId], references: [id])
@@ -92,8 +96,17 @@ model Friends {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   status     String // "online", "offline", "in_game"
-  receiverId String
-  friend     User     @relation("friendsSender", fields: [receiverId], references: [id])
-  senderId   String
-  user       User     @relation("friendReceiver", fields: [senderId], references: [id])
+  friendId   String
+  isBlocked  Boolean  @default(false)
+  friend     User     @relation("friends", fields: [friendId], references: [id])
+}
+
+model BlockedUsers {
+  id         String   @id @default(uuid())
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  blockerUser String
+  getblockedid   String
+  blocker    User     @relation("blocker", fields: [blockerUser], references: [id])
+  getblocked  User     @relation("Getblocked", fields: [getblockedid], references: [id])
 }

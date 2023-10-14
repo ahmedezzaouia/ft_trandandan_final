@@ -6,7 +6,7 @@
 
 
 module.exports = {
-  reactStrictMode: true, 
+  reactStrictMode: true,
     images: {
       remotePatterns: [
         {

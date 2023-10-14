@@ -2,7 +2,7 @@ import { useState } from "react";
 import  {useIsDirectMessage}  from "@/store/userStore";
 import useRecieverStore from "@/store/recieverStore";
 
-export default function TopBar({user, username} : {user:any, username: string}){
+export default function TopBar({user, username, channel} : {user:any, username: string, channel: string}){
     const [isComponentVisible, setIsComponentVisible] = useState(false);
     const {isDirectMessage, setIsDirectMessage} = useIsDirectMessage();
     const { reciever, setReciever } = useRecieverStore();
@@ -14,7 +14,7 @@ export default function TopBar({user, username} : {user:any, username: string}){
         {/* name of channal */}
         <div className="flex flex-col " >
           <h3 className=" mb-1 font-extrabold">
-            <span className="text-xl font-bold opacity-50">#</span> {isDirectMessage ? reciever : "general"}
+            <span className="text-xl font-bold opacity-50">#</span> {isDirectMessage ? reciever : channel}
           </h3>
         </div>
 
@@ -24,29 +24,6 @@ export default function TopBar({user, username} : {user:any, username: string}){
           <div className="relative">
             {/* megamenu profile */}
             <div className="absolute top-0 right-0  -mt-5 mr-2 flex items-center" >
-              {/* button of profile */}
-              <svg
-                className="mr-10"
-                width="31"
-                height="37"
-                viewBox="0 0 21 37"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M15.8457 11.3281C16.8812 11.3281 17.7207 10.3138 17.7207 9.06251C17.7207 7.81124 16.8812 6.79688 15.8457 6.79688C14.8102 6.79688 13.9707 7.81124 13.9707 9.06251C13.9707 10.3138 14.8102 11.3281 15.8457 11.3281Z"
-                  fill="#FFFEFE"
-                />
-                <path
-                  d="M15.8457 20.3906C16.8812 20.3906 17.7207 19.3763 17.7207 18.125C17.7207 16.8737 16.8812 15.8594 15.8457 15.8594C14.8102 15.8594 13.9707 16.8737 13.9707 18.125C13.9707 19.3763 14.8102 20.3906 15.8457 20.3906Z"
-                  fill="#FFFEFE"
-                />
-                <path
-                  d="M15.8457 29.4531C16.8812 29.4531 17.7207 28.4388 17.7207 27.1875C17.7207 25.9362 16.8812 24.9219 15.8457 24.9219C14.8102 24.9219 13.9707 25.9362 13.9707 27.1875C13.9707 28.4388 14.8102 29.4531 15.8457 29.4531Z"
-                  fill="#FFFEFE"
-                />
-              </svg>
-              {/* profile drawer */}
 
               {/* <!-- drawer component --> */}
               <button

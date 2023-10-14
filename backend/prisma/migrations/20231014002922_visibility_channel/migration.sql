@@ -32,6 +32,7 @@ CREATE TABLE "ChannelMessage" (
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "channelId" TEXT NOT NULL,
+    "visibility" TEXT NOT NULL DEFAULT 'public',
     "userId" TEXT NOT NULL,
 
     CONSTRAINT "ChannelMessage_pkey" PRIMARY KEY ("id")
@@ -78,10 +79,21 @@ CREATE TABLE "Friends" (
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "status" TEXT NOT NULL,
-    "receiverId" TEXT NOT NULL,
-    "senderId" TEXT NOT NULL,
+    "friendId" TEXT NOT NULL,
+    "isBlocked" BOOLEAN NOT NULL DEFAULT false,
 
     CONSTRAINT "Friends_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "BlockedUsers" (
+    "id" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "blockerUser" TEXT NOT NULL,
+    "getblockedid" TEXT NOT NULL,
+
+    CONSTRAINT "BlockedUsers_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex
@@ -121,7 +133,10 @@ ALTER TABLE "FriendRequest" ADD CONSTRAINT "FriendRequest_receiverId_fkey" FOREI
 ALTER TABLE "Notification" ADD CONSTRAINT "Notification_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Friends" ADD CONSTRAINT "Friends_receiverId_fkey" FOREIGN KEY ("receiverId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Friends" ADD CONSTRAINT "Friends_friendId_fkey" FOREIGN KEY ("friendId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Friends" ADD CONSTRAINT "Friends_senderId_fkey" FOREIGN KEY ("senderId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "BlockedUsers" ADD CONSTRAINT "BlockedUsers_blockerUser_fkey" FOREIGN KEY ("blockerUser") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "BlockedUsers" ADD CONSTRAINT "BlockedUsers_getblockedid_fkey" FOREIGN KEY ("getblockedid") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
