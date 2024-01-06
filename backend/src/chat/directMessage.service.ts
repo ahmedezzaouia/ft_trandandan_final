@@ -24,10 +24,12 @@ export class directMessageService {
       },
     });
     if (!user) {
-      throw new Error('User not found');
+      console.log('User not found');
+      return;
     }
     if (!reciever) {
-      throw new Error('reciever not found');
+      console.log('reciever not found');
+      return;
     }
     const createDirectMessage = await this.prisma.directMessage.create({
       data: {
@@ -53,7 +55,10 @@ export class directMessageService {
     sender: string;
     reciever: string;
   }) {
-    
+    if (!data.sender || !data.reciever) {
+      console.log('sender not found');
+      return;
+    }
     const user = await this.prisma.user.findUnique({
       where: {
         username: data.sender,
@@ -103,6 +108,7 @@ export class directMessageService {
         receiver: true,
       },
     });
+    console.log(listDirectMessages)
     return listDirectMessages;
   }
 }

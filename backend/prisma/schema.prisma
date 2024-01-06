@@ -10,12 +10,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum UserStatus {
-  ONLINE
-  OFFLINE
-  IN_GAME
-}
-
 model User {
   id                     String           @unique @id @default(uuid()) 
   username               String           @unique
@@ -23,41 +17,92 @@ model User {
   isTwofactorsEnabled    Boolean          @default(false)
   twoFactorsSecret       String?
   avatarUrl              String
-  status                 UserStatus       @default(OFFLINE)
+  status                 String           @default("offline")
   channel                Channel[]
   channelMessage         ChannelMessage[]
+  acceptedChannelInvite  acceptedChannelInvite[]
+  channelMemberships    ChannelMembership[]
+  senderInvitesChannel   ChannelInvite[]  @relation("senderInvitesChannel")
+  receiverInvitesChannel ChannelInvite[]  @relation("receiverInvitesChannel")
   sentDirectMessages     DirectMessage[]  @relation("sender")
   receivedDirectMessages DirectMessage[]  @relation("receiver")
-  friends                Friends[]        @relation("friends")
+  friends                Friends[]        @relation("myfriends")
+  friendsOf              Friends[]        @relation("MefriendsOf")
   senderRequests         FriendRequest[]  @relation("senderRequests")
   receiverRequests       FriendRequest[]  @relation("receiverRequests")
   notifications          Notification[]
   blocker                BlockedUsers[]   @relation("blocker")
-  getblocked              BlockedUsers[]   @relation("Getblocked")
+  getblocked             BlockedUsers[]   @relation("Getblocked")
 
+  // -----salhi
+  gamesWon  GameHistory[] @relation("win")
+  gamesLost GameHistory[] @relation("lose")
+  games GameHistory[] @relation("user1")
+  oppenentgamesplayed GameHistory[] @relation("oppenent")
+  total_goals Int?
 }
 
 model Channel {
   id             String           @id @default(uuid())
-  name           String           @unique
+  name           String           //@unique
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt
-  role           String           @default("owner")
   visibility     String @default("public")
+  role           String @default("owner")
+  password       String?
   ChannelMessage ChannelMessage[]
   userId         String
   user           User             @relation(fields: [userId], references: [id])
+  ChannelInvite  ChannelInvite[]
+  ChannelMembership ChannelMembership[]
 }
 
 model ChannelMessage {
   id        String   @id @default(uuid())
   message   String
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
   channelId String
   channel   Channel  @relation(fields: [channelId], references: [id])
   userId    String
   user      User     @relation(fields: [userId], references: [id])
+}
+
+model acceptedChannelInvite {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  idOfChannel String
+  role      String @default("member")
+  channelId String
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+}
+
+model ChannelMembership {
+  id             String   @id @default(uuid())
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  roleId         String   @default("member")
+  isAdmin        Boolean  @default(false)
+  isKicked       Boolean  @default(false)
+  isBanned       Boolean  @default(false)
+  time           DateTime?
+  channelId      String
+  
+  channel        Channel  @relation(fields: [channelId], references: [id])
+  userId         String
+  user           User     @relation(fields: [userId], references: [id])
+}
+
+model ChannelInvite {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  channelId String
+  status    String // "pending", "accepted", "rejected"
+  channel   Channel  @relation(fields: [channelId], references: [id])
+  senderId  String
+  sender    User     @relation("senderInvitesChannel", fields: [senderId], references: [id])
+  receiverId String
+  receiver  User     @relation("receiverInvitesChannel", fields: [receiverId], references: [id])
 }
 
 model DirectMessage {
@@ -85,7 +130,6 @@ model FriendRequest {
 model Notification {
   id        String   @id @default(uuid())
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
   content   String
   userId    String
   user      User     @relation(fields: [userId], references: [id])
@@ -96,9 +140,11 @@ model Friends {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   status     String // "online", "offline", "in_game"
-  friendId   String
   isBlocked  Boolean  @default(false)
-  friend     User     @relation("friends", fields: [friendId], references: [id])
+  MyfriendId   String
+  friend     User     @relation("myfriends", fields: [MyfriendId], references: [id])
+  MefriendsOfId     String
+  MefriendOf       User     @relation("MefriendsOf", fields: [MefriendsOfId], references: [id])
 }
 
 model BlockedUsers {
@@ -109,4 +155,19 @@ model BlockedUsers {
   getblockedid   String
   blocker    User     @relation("blocker", fields: [blockerUser], references: [id])
   getblocked  User     @relation("Getblocked", fields: [getblockedid], references: [id])
+}
+
+// -----salhi
+model GameHistory {
+  id       String    @unique @id @default(uuid()) 
+  userId  String
+  user    User   @relation("user1", fields: [userId], references: [id])
+  oppenentId  String
+  oppenent    User   @relation("oppenent", fields: [oppenentId], references: [id])
+  winnerId String
+  winner   User   @relation("win", fields: [winnerId], references: [id])
+  loserId  String
+  loser    User   @relation("lose", fields: [loserId], references: [id])
+  user_score Int
+  opp_score Int
 }

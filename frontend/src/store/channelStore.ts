@@ -1,25 +1,25 @@
 import { create } from "zustand";
 
-type IsChannelType = {
-    isChannel: boolean;
-    setIsChannel: (isChannel: boolean) => void;
-    }
-
-const useIsChannel = create<IsChannelType>((set) => ({
-    isChannel: false,
-    setIsChannel: (isChannel: boolean) => set({ isChannel }),
-    }));
-
     type ChannelStoreType = {
         channel: string;
         setChannel: (channel: string) => void;
       }
     // state to store the channel name
     const useChannleTypeStore = create<ChannelStoreType>((set) => ({
-        channel: "general",
+        channel: "public",
         setChannel: (channel: string) => set({ channel }),
       }));
-    
 
-export default useIsChannel;
+      // channel id 
+      type useChannleIdStore = {
+        channelId: any;
+        setChannelId: (channel: any) => void;
+      }
+
+      const useChannleIdStore = create<useChannleIdStore>((set) => ({
+        channelId: "",
+        setChannelId: (channelId: any) => set({ channelId }),
+      }));
+    
 export  {useChannleTypeStore};
+export {useChannleIdStore};

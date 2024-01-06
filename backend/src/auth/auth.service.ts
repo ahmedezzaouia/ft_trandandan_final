@@ -5,7 +5,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 export class AuthService {
   constructor(private prisma: PrismaService) {}
   login(@Res() res) {
-    return res.redirect("https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-959f0cefb9aeb1de8f798ede9473aa9db48798e88ecbab28ca37c98c465b4f16&redirect_uri=http%3A%2F%2Flocalhost%3A3001%2Fauth%2Fcallback&response_type=code");
+    return res.redirect("https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-b2ca9139e56bb3a5942427a74bcafe6e6506ae6d8221bf05f657123cca10be73&redirect_uri=http%3A%2F%2Flocalhost%3A3001%2Fauth%2Fcallback&response_type=code");
   }
 
   callback(@Res() res, @Req() req) {
