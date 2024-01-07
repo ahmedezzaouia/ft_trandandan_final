@@ -52,7 +52,7 @@ export default function ChatContent({
   const [blockerUsername, setBlockerUsername] = useState<any>([]);
   const [getblockedid, setGetblockedid] = useState<any>([]);
   const [newFriend, setNewFriend] = useState(false);
-  // const [isChangePassword, setIsChangePassword] = useState(false);
+  const [annoncement, setAnnoncement] = useState("");
 
   async function fetchUsername() {
     const storedUserData = sessionStorage.getItem("user-store");
@@ -91,7 +91,6 @@ export default function ChatContent({
       // the scrollHeight is the height of the chat messages
       // the scrollTop is the height of the chat content
     }
-
   }, [arrayMessages]);
 
   // auto scroll to the bottom of the chat for channel messages
@@ -102,52 +101,63 @@ export default function ChatContent({
     }
   }, [senderMessages]);
 
- 
-
   //----------- send message ----------------
 
   const sendMessage = () => {
     // Send the message input to the serv
     if (messageInput === "" || channel === "") return;
-
-    if (!isDirectMessage && !isProtected) {
-      socket.emit("channelMessage", {
-        sender: username,
-        channel: channel,
-        channelId: channelId,
-        message: messageInput,
-      });
-      socket.on("channelMessage", () => {
-        if (!isProtected) {
-          handlelistChannelMessages();
-        }
-      });
-    } else if (isDirectMessage && !isBlockUser && !isProtected) {
-      socket.emit("directMessage", {
-        sender: username,
-        reciever: reciever,
-        message: messageInput,
-      });
-      socket.on("directMessage", (data) => {
-        if (data) {
-          handlelistDirectMessages();
-        }
-      });
-    }
-
-    setMessageInput("");
-    
-
-    return () => {
-      socket.off("channelMessage");
-      socket.off("directMessage");
-    };
-  };
-
-   //----------- handle key down ----------------
-   const handleKeyDown = (e: any) => {
+    GetBlockedUsers();
+    checkIfTheUserIsBaned();
+    checkIfTheUserIsMuted();
     DirectMessageBlockUser();
     checkIfChannelIsProtected();
+
+    if (isMuted) {
+      setAnnoncement("you are muted by the admin");
+      return;
+    } else if (youAreBaned) {
+      setAnnoncement("you are baned by the admin");
+      return;
+    } else if (isBlockUser) {
+      setAnnoncement("you are blocked by your friend");
+      return;
+    } else {
+      if (!isDirectMessage && !isProtected) {
+        socket.emit("channelMessage", {
+          sender: username,
+          channel: channel,
+          channelId: channelId,
+          message: messageInput,
+        });
+        socket.on("channelMessage", () => {
+          if (!isProtected) {
+            handlelistChannelMessages();
+          }
+        });
+      } else if (isDirectMessage && !isBlockUser && !isProtected) {
+        socket.emit("directMessage", {
+          sender: username,
+          reciever: reciever,
+          message: messageInput,
+        });
+        socket.on("directMessage", (data) => {
+          if (data) {
+            handlelistDirectMessages();
+          }
+        });
+      }
+
+      setMessageInput("");
+
+      return () => {
+        socket.off("channelMessage");
+        socket.off("directMessage");
+      };
+    }
+  };
+
+  //----------- handle key down ----------------
+  const handleKeyDown = (e: any) => {
     if (e.key === "Enter") {
       e.preventDefault(); // Prevents the default behavior (e.g., new line) for the Enter key
       sendMessage();
@@ -219,7 +229,6 @@ export default function ChatContent({
     socket.on("checkIfTheUserIsBlocked", (data) => {
       if (data) {
         for (let i = 0; i < data.length; i++) {
-          
           const blockerUserId = data[i].blockerUser;
           const getblockedid = data[i].getblockedid;
           setGetblockedid(getblockedid);
@@ -227,7 +236,6 @@ export default function ChatContent({
           socket.on("getUserById", (data) => {
             const blockerUsername = data.username;
             setBlockerUsername(blockerUsername);
-
           });
           return () => {
             socket.off("getUserById");
@@ -280,49 +288,19 @@ export default function ChatContent({
           setArrayMessages([]);
           return;
         }
-        if (youAreBaned && channel !== "general") {
-          console.log("you are baned");
-          // set a default message to show that you are baned
-          let banedMessage = {
-            user: {
-              username: "banned user",
-              avatarUrl:
-                "https://static.vecteezy.com/system/resources/previews/011/912/911/non_2x/banned-poster-red-sign-locked-warning-about-blocking-online-content-deleting-user-from-social-network-account-restricting-information-web-channel-banning-use-negative-materials-vector.jpg",
-            },
-            message: "",
-            channel: "baned",
-            sender: "banned user",
-          };
-          // setSenderMessages([banedMessage]);
-          setRecieverMessages([banedMessage]);
-          return;
-        } else if (isMuted && channel !== "general") {
-          // set a default message to show that you are muted
-          console.log("you are muted");
-          let muteMessage = {
-            user: {
-              username: "muted user",
-              avatarUrl:
-                "https://static.vecteezy.com/system/resources/previews/011/912/911/non_2x/banned-poster-red-sign-locked-warning-about-blocking-online-content-deleting-user-from-social-network-account-restricting-information-web-channel-banning-use-negative-materials-vector.jpg",
-            },
-            message: "",
-            channel: "muted",
-            sender: "you have been muted",
-          };
-          setSenderMessages([]);
-          setRecieverMessages([muteMessage]);
-          return;
-        } else if (serverChannel === staticChannelName) {
+        if (serverChannel === staticChannelName) {
           if (usernameFromServer !== usernameFromSession) {
             // i return 2 arrays one for the sender and the other for the reciever and i check if the username is the sender or the reciever to set the messages
             GetBlockedUsers();
             for (let i = 0; i < data.msg.length; i++) {
-              if (data.msg[i]?.user?.id === getblockedid && blockerUsername === username) {
+              if (
+                data.msg[i]?.user?.id === getblockedid &&
+                blockerUsername === username
+              ) {
                 setSenderMessages(
                   data.msg.filter((message: any) => {
                     return message.user.username === username;
-                  }
-                  )
+                  })
                 );
                 setAvaterUser(data.msg[0]?.user.avatarUrl);
                 setNameUser(user?.username);
@@ -394,15 +372,16 @@ export default function ChatContent({
       channelId: channelId,
     });
     socket.on("checkIfTheUserIsBaned", (data) => {
-    if (data && data?.user?.username === username && data?.isBanned === true) {
+      if (
+        data &&
+        data?.user?.username === username &&
+        data?.isBanned === true
+      ) {
         setYouAreBaned(true);
-        console.log("yes you are baned")
-      }
-    else {
+      } else {
         setYouAreBaned(false);
-        console.log("no you are not baned")
-    }
-    console.log(youAreBaned)
+      }
+      console.log(youAreBaned);
     });
   };
 
@@ -422,18 +401,11 @@ export default function ChatContent({
   };
 
   useEffect(() => {
-    // // handle online/offline status
-    // socket.emit("onlineStatus", { username: username, status: "online" });
-    // // if user click on close tab or change the url set the status to offline
-    // window.addEventListener("beforeunload", () => {
-    //   socket.emit("onlineStatus", { username: username, status: "offline" });
-    // });
-
-    GetBlockedUsers();
-    checkIfTheUserIsBaned();
-    checkIfTheUserIsMuted();
+    // GetBlockedUsers();
+    // checkIfTheUserIsBaned();
+    // checkIfTheUserIsMuted();
     handlelistChannelMessages();
-    
+
     return () => {
       socket.off("listChannelMessages");
       socket.off("onlineStatus");
@@ -450,32 +422,30 @@ export default function ChatContent({
       socket.off("sendFriendRequest");
       socket.off("notification");
       socket.off("joinChannel");
+      setAnnoncement("");
     };
-  }, [
-    isDirectMessage,
-    channel,
-    isCorrectPassword,
-    youAreBaned,
-  ]);
+  }, [isDirectMessage, channel, isCorrectPassword, youAreBaned]);
 
   useEffect(() => {
-
-      socket.emit("onlineStatus", { username: user?.username, status: "online" });
-      // if user click on close tab or change the url set the status to offline
-      window.addEventListener("beforeunload", () => {
-        socket.emit("onlineStatus", { username: user?.username, status: "offline" });
+    socket.emit("onlineStatus", { username: user?.username, status: "online" });
+    // if user click on close tab or change the url set the status to offline
+    window.addEventListener("beforeunload", () => {
+      socket.emit("onlineStatus", {
+        username: user?.username,
+        status: "offline",
       });
-      setArrayMessages([]);
-      handlelistDirectMessages();
-      console.log("reciever", reciever)
-      return () => {
-        socket.off("listDirectMessages");
-      };
+    });
+    setArrayMessages([]);
+    handlelistDirectMessages();
+    console.log("reciever", reciever);
+    return () => {
+      socket.off("listDirectMessages");
+    };
   }, [reciever]);
 
   const handleNewFriend = () => {
     setNewFriend(!newFriend);
-  }
+  };
 
   return (
     <div className="chat-content flex-1 flex flex-col overflow-hidden rounded-3xl shadow border border-gray-800 ">
@@ -483,15 +453,14 @@ export default function ChatContent({
 
       {/* <!-- Chat direct messages --> */}
       {isDirectMessage ? (
-        <div className=" p-14 flex-1 overflow-auto"
-        ref={MessageRef}
-        >
+        <div className=" p-14 flex-1 overflow-auto" ref={MessageRef}>
           {
             <div>
               {arrayMessages.map((message: any, index: number) => (
                 <div key={index} className="flex flex-col mb-4 text-sm">
-                  <div className="flex items-center"
-                  onClick={() => handleNewFriend()}
+                  <div
+                    className="flex items-center"
+                    onClick={() => handleNewFriend()}
                   >
                     <img
                       src={message.sender.avatarUrl} // Assuming sender has an avatarUrl property
@@ -502,36 +471,19 @@ export default function ChatContent({
                       {message.sender.username}
                     </p>
                   </div>
-                    <p className="text-white font-sans px-14">
-                      {message.message}
+                  <p className="text-white font-sans px-14">
+                    {message.message}
                   </p>
                 </div>
               ))}
-              <div>
-                {/* you are blocked */}
-                {isBlockUser && (
-                  <div className="flex items-center justify-center my-60">
-                    <div className="flex items-center">
-                      <img
-                        src="https://static.vecteezy.com/system/resources/previews/021/432/993/original/blocked-rubber-stamp-free-png.png"
-                        className="w-40 h-40 rounded-full mr-3"
-                      />
-                    </div>
-                  </div>
-                )}
-              </div>
             </div>
           }
           {/* <!-- A response message --> */}
         </div>
       ) : (
         // channel messages
-        <div className=" p-14 flex-1 overflow-auto"
-        ref={MessageRef}
-        >
-          <div className="flex flex-col mb-4 text-sm"
-          
-          >
+        <div className=" p-14 flex-1 overflow-auto" ref={MessageRef}>
+          <div className="flex flex-col mb-4 text-sm">
             {isProtected && !isCorrectPassword && (
               // input to enter the password
 
@@ -578,9 +530,9 @@ export default function ChatContent({
                       {message.user?.username}
                     </p>
                   </div>
-                    <p className="text-white font-sans px-14">
-                      {message.message}
-                    </p>
+                  <p className="text-white font-sans px-14">
+                    {message.message}
+                  </p>
                 </div>
               ))}
             {!isProtected &&
@@ -595,11 +547,31 @@ export default function ChatContent({
                       {message.user?.username}
                     </p>
                   </div>
-                    <p className="text-white font-sans px-14">
-                      {message.message}
+                  <p className="text-white font-sans px-14">
+                    {message.message}
                   </p>
                 </div>
               ))}
+          </div>
+        </div>
+      )}
+
+      {annoncement && (
+        <div className="flex items-center justify-center my-60">
+          <div className="flex items-center">
+            <p className="text-white font-bold mr-4">{annoncement}</p>
+            {isMuted && (
+              <img
+                src="https://cdn2.iconfinder.com/data/icons/forbidden-signs/511/silence-512.png"
+                className="w-10 h-10 rounded-full mr-3 bg-slate-400"
+              />
+            )}
+            {youAreBaned && (
+              <img
+                src="https://static.vecteezy.com/system/resources/previews/011/912/911/non_2x/banned-poster-red-sign-locked-warning-about-blocking-online-content-deleting-user-from-social-network-account-restricting-information-web-channel-banning-use-negative-materials-vector.jpg"
+                className="w-10 h-10 rounded-full mr-3 bg-slate-400"
+              />
+            )}
           </div>
         </div>
       )}
@@ -622,7 +594,7 @@ export default function ChatContent({
             />
             <span
               className="text-3xl text-grey p-2 bg-slate-800"
-              onClick={()=> sendMessage()}
+              onClick={() => sendMessage()}
             >
               <svg
                 width="21"

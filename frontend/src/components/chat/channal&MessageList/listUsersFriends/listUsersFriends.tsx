@@ -14,7 +14,6 @@ export default function ListUsersFriends({ username }: { username: any }) {
   const { reciever, setReciever } = useRecieverStore();
   const [friendsId, setFriendsId] = useState([]);
   const [UserName, setUserName] = useState("");
-  const [showBlockInviteTogame, setShowBlockInviteTogame] = useState(false);
   const [noFriends, setNoFriends] = useState(false);
   const [color, setColor] = useState("bg-green-400");
 
@@ -81,11 +80,6 @@ export default function ListUsersFriends({ username }: { username: any }) {
     setIsDirectMessage(true);
   };
 
-  // const blockUser = (username: string) => {
-  //   // UserName is the username of the user who blocked which is saved in session storage // todo ana
-  //   socket.emit("blockUser", { willbocked: username, whoblocked: UserName });
-  //   setShowBlockInviteTogame(!showBlockInviteTogame);
-  // };
 
   return (
     <>

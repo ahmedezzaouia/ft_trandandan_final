@@ -11,6 +11,7 @@ export default function AddFriends() {
   const [accepted, setAccepted] = useState(false);
   const [pending, setPending] = useState(false);
   const [friends, setFriends] = useState<any[]>([]);
+  const [blocked, setBlocked] = useState(false);
 
   // Get the id of the user from the URL
   const params = useParams();
@@ -89,6 +90,26 @@ export default function AddFriends() {
     };
   }, [username, receiver, userId]);
 
+
+  // Block user
+  const handleBlockUser = () => {
+    console.log("username", username, receiver);
+    socket.emit("blockUser", {
+      willbocked: username,
+      whoblocked: receiver,
+    });
+    socket.on("blockUser", (data) => {
+      console.log("data", data);
+      if (data) {
+        setBlocked(true);
+      }
+    }
+    );
+    return () => {
+      socket.off("blockUser");
+    }
+  };
+
   return (
     <>
       {receiver !== username ? (
@@ -116,8 +137,12 @@ export default function AddFriends() {
             <>
               {accepted && (
                 <>
-                  <button className="p-2 px-4 text-xs  mt-3 w-32 border rounded-full shadow-lg  bg-red-500 hover:bg-red-600 text-white font-bold py-2 ">
-                    Block User
+                  <button className="p-2 px-4 text-xs  mt-3 w-32 border rounded-full shadow-lg  bg-red-500 hover:bg-red-600 text-white font-bold py-2 "
+                  onClick={() => {
+                    handleBlockUser();
+                  } }
+                  >
+                    {blocked ? "block User" : "Blocked"}
                   </button>
                   <button className="p-2 px-4 text-xs  mt-3 w-32 border rounded-full shadow-lg  bg-green-500 hover:bg-green-600 text-white font-bold py-2 ">
                     invite to game
