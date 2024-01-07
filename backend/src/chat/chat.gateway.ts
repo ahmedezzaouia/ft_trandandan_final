@@ -41,26 +41,26 @@ export class ChatGateway implements OnGatewayDisconnect{
      }
     
     
-    
-    @SubscribeMessage('AddUserToRoom')
-    handlequeue(client: Socket, user: User): void {
-      const match = this.queue.addPlayerToQueue(client, user);
-      if (match){
-        this.queue.emptyplayers();
-        this.room.startgame(match);
-      }
+  
+  @SubscribeMessage('AddUserToRoom')
+  handlequeue(client: Socket, user: User): void {
+    const match = this.queue.addPlayerToQueue(client, user);
+    if (match){
+      this.queue.emptyplayers();
+      this.room.startgame(match);
     }
-    
-    @SubscribeMessage('dataofmouse')
-    handlemouse(client: Socket, position: number): void {
-      this.room.setmouseposition(client, position);
-    }
-    
-    handleDisconnect(clinet: Socket){
-      console.log("hereeeeee\n");
-      this.queue.userquit(clinet);
-      this.room.userdisconnect(clinet);
-    }
+  }
+  
+  @SubscribeMessage('dataofmouse')
+  handlemouse(client: Socket, position: number): void {
+    this.room.setmouseposition(client, position);
+  }
+  
+  handleDisconnect(clinet: Socket){
+    this.queue.userquit(clinet);
+    this.room.userdisconnect(clinet);
+  }
+
   // Join a specific channel room
   @SubscribeMessage('joinChannel')
   async joinChannel(
@@ -990,6 +990,7 @@ export class ChatGateway implements OnGatewayDisconnect{
       channelId: string;
     },
   ){
+    console.log('BanMember data: ', data);
     if (!data.sender || !data.member || !data.channelId) {
       console.log('Channel not found BanMember data');
       return;
@@ -1011,7 +1012,7 @@ export class ChatGateway implements OnGatewayDisconnect{
     });
 
     if (!member) {
-      console.log('member not found', data.sender);
+      console.log('member not found1', data.sender);
       return;
     }
 
@@ -1092,18 +1093,30 @@ export class ChatGateway implements OnGatewayDisconnect{
           username: data.member,
         },
       });
+      console.log('member2: ', member2);
   
       const checkMember2 = await this.prisma.channelMembership.findFirst({
         where: {
-          channelId: data.channelId,
-          userId: member2.id,
-          roleId: 'member',
+          OR: [
+            {
+              channelId: data.channelId,
+              userId: member2.id,
+              roleId: 'member',
+            },
+            {
+              channelId: data.channelId,
+              userId: member2.id,
+              roleId: 'admin',
+              isAdmin: true,
+            },
+          ],
+          
         },
       });
   
       if (!checkMember2)
         {
-          console.log('member not found', checkMember2);
+          console.log('member not found2', checkMember2);
           this.server.emit('BanMember', checkMember2);
           return;
         }
@@ -1125,6 +1138,187 @@ export class ChatGateway implements OnGatewayDisconnect{
 
 
   }
+
+
+  @SubscribeMessage('MuteMember')
+  async MuteMember(
+    @MessageBody()
+    data: {
+      sender: string;
+      member: string;
+      channelId: string;
+      Muted: boolean;
+    },
+  ) {
+    console.log('MuteMember data: ', data);
+    if (!data.sender || !data.member || !data.channelId) {
+      console.log('Channel not found MuteMember data');
+      return;
+    }else if (data.sender === data.member) {
+      console.log('you can not mute your self');
+      this.server.emit('MuteMember', "you can not mute your self");
+      return;
+    }
+
+    // first we will check if the sender has just the role member becuse he can not mute anyone
+    const member = await this.prisma.user.findUnique({
+      where: {
+        username: data.sender,
+      },
+    });
+
+    if (!member) {
+      console.log('member not found1', member);
+      return;
+    }
+
+    const checkMember = await this.prisma.channelMembership.findFirst({
+      where: {
+        channelId: data.channelId,
+        userId: member.id,
+        roleId: 'member',
+      },
+    });
+
+    if (checkMember) {
+      // so the sender is just a member
+      console.log('you are just a member');
+      this.server.emit('MuteMember', "you are just a member");
+      return;
+    }
+
+    
+    // check if the sender is owner
+    const owner = await this.prisma.user.findUnique({
+      where: {
+        username: data.sender,
+      },
+    });
+
+    const checkOwner = await this.prisma.channel.findFirst({
+      where: {
+        id: data.channelId,
+        userId: owner.id,
+        role: 'owner',
+      },
+    });
+
+    //TODO: THIS CASE FOR ADMIN
+    if (!checkOwner) {
+      // so the sender is an admin
+      // this case the sender can mute a member but not an admin or owner
+      const member = await this.prisma.user.findUnique({
+        where: {
+          username: data.member,
+        },
+      });
+
+      const checkMember = await this.prisma.channelMembership.findFirst({
+        where: {
+          channelId: data.channelId,
+          userId: member.id,
+          roleId: 'member',
+        },
+      });
+
+      if (!checkMember) {
+        console.log('you can not mute an admin or owner');
+        this.server.emit('MuteMember', "you can not mute an admin or owner");
+        return;
+      }
+
+      if (data.Muted) {
+        const isMutedMember = await this.prisma.channelMembership.update({
+          where: {
+            id: checkMember.id,
+          },
+          data: {
+            isMuted: false,
+          },
+        });
+
+        this.server.emit('MuteMember', isMutedMember);
+        return isMutedMember;
+      }else{
+        const MutedMember = await this.prisma.channelMembership.update({
+          where: {
+            id: checkMember.id,
+          },
+          data: {
+            isMuted: true,
+          },
+        });
+        this.server.emit('MuteMember', MutedMember);
+        return MutedMember;
+      }
+      
+    }else{
+      // so the sender is an owner
+  
+      // TODO: this case the sender can mute anyone
+  
+      const member2 = await this.prisma.user.findUnique({
+        where: {
+          username: data.member,
+        },
+      });
+  
+      const checkMember2 = await this.prisma.channelMembership.findFirst({
+        where: {
+          OR: [
+            {
+              channelId: data.channelId,
+              userId: member2.id,
+              roleId: 'member',
+            },
+            {
+              channelId: data.channelId,
+              userId: member2.id,
+              roleId: 'admin',
+            },
+          ],
+          
+        },
+      });
+  
+      if (!checkMember2){
+        console.log('member not found2', checkMember2);
+        return;
+      }
+  
+      if (data.Muted) {
+        console.log("muted is true")
+        const isMutedMember2 = await this.prisma.channelMembership.update({
+          where: {
+            id: checkMember2.id,
+          },
+          data: {
+            isMuted: false,
+          },
+        });
+  
+        this.server.emit('MuteMember', isMutedMember2);
+        console.log('isMutedMember3: ', isMutedMember2);
+        return isMutedMember2;
+      }
+  
+      const muteMember2 = await this.prisma.channelMembership.update({
+        where: {
+          id: checkMember2.id,
+        },
+  
+        data: {
+          isMuted: true,
+        },
+  
+      });
+  
+      this.server.emit('MuteMember', "owner muted member");
+      console.log('muteMember2: ', muteMember2);
+      return muteMember2;
+    }
+  }
+
 
 
 
@@ -1166,6 +1360,42 @@ export class ChatGateway implements OnGatewayDisconnect{
     return checkIfTheUserIsBaned;
   }
 
+  // checkIfTheUserIsMuted  
+  @SubscribeMessage('checkIfTheUserIsMuted')
+  async checkIfTheUserIsMuted(
+    @MessageBody()
+    data: {
+      sender: string;
+      channelId: string;
+    },
+  ) {
+    if (!data.sender && !data.channelId) {
+      return;
+    }
+    const user = await this.prisma.user.findUnique({
+      where: {
+        username: data.sender,
+      },
+    });
+
+    const checkIfTheUserIsMuted = await this.prisma.channelMembership.findFirst({
+      where: {
+        channelId: data.channelId,
+        userId: user.id,
+        isMuted: true,
+      },
+      include: {
+        channel: true,
+        user: true,
+      },
+    });
+
+    let isMuted = false;
+    if (checkIfTheUserIsMuted) {
+      isMuted = true;
+    }
+    this.server.emit('checkIfTheUserIsMuted', checkIfTheUserIsMuted);
+  }
 
   
 

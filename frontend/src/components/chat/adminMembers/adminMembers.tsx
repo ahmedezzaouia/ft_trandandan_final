@@ -1,8 +1,9 @@
 "use client";
 import { useIsDirectMessage } from "@/store/userStore";
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import socket from "@/services/socket";
 import { useChannleIdStore } from "@/store/channelStore";
+import useUsernameStore from "@/store/usernameStore";
 
 export default function AdminsMembers({
   user,
@@ -16,12 +17,20 @@ export default function AdminsMembers({
   const [members, setMembers] = useState<any[]>([]);
   const [admins, setAdmins] = useState<any[]>([]);
   const [Setting, setSetting] = useState<boolean>(false);
+  const [isMuted, setIsMuted] = useState<boolean>(false);
+  const [ShowTimeMuted, setShowTimeMuted] = useState<boolean>(false);
   const [member, setMember] = useState<string>("");
   const [sender, setSender] = useState<string>("");
+  const [justMemebre, setJustMemebre] = useState<boolean>(false);
   const [disableListMembers, setDisableListMembers] = useState<boolean>(false);
   const [showMembersAndAdminsCmp, setShowMembersAndAdmins] =
     useState<boolean>(false);
+  const { username, setUsername } = useUsernameStore();
+  const [annoncement, setAnnoncement] = useState("");
+  const [Muted, setMuted] = useState<boolean>(false);
 
+
+    
   const listMembers = (channelId: string) => {
     socket.emit("getChannelById", { id: channelId });
     socket.on("getChannelById", (data: any) => {
@@ -29,20 +38,17 @@ export default function AdminsMembers({
         setDisableListMembers(true);
         return;
       } else {
-        // setMembers([]);
-        // setAdmins([]);
-        const username = user?.username;
+        
         socket.emit("ChannelMembers", { channelId, username });
         socket.on("ChannelMembers", (data: any) => {
-          console.log(data)
           // if (username !== data[0]?.username) return;
-         
           // TODO: filter the sender
           data?.map((member: any) => {
             // filter the owner and admins
             setMembers(data);
           });
         });
+        
       }
     });
   
@@ -51,15 +57,11 @@ export default function AdminsMembers({
   // TODO: 3ANDI NAFS ADMIN F 2 DIFFERENT CLIENTS
   
   const listAdmins = (channelId: string) => {
-    // setMembers([]);
-    // setAdmins([]);
+
     // list all admins in the channel
     socket.emit("GetChannelAdmins", { channelId });
     socket.on("GetChannelAdmins", (data: any) => {
-      // if(user.username !== data[0]?.user?.username) return;
-      console.log(data)
-      console.log("🚀 ~ file: adminMembers.tsx:65 ~ socket.on ~ data[0]?.username:", data[0]?.user?.username)
-      console.log("🚀 ~ file: adminMembers.tsx:65 ~ socket.on ~ user.username:", user.username)
+      // if(user.username !== data[0]?.username) return;
       for (let i = 0; i < data.length; i++) {
         setAdmins((admins) =>
           [...admins, data[i]?.user].filter(
@@ -75,8 +77,6 @@ export default function AdminsMembers({
   // list all members in the channel
   useEffect(() => {
     if (channelId) {
-      // setMembers([]);
-      // setAdmins([]);
       listAdmins(channelId);
       listMembers(channelId);
     }
@@ -86,82 +86,136 @@ export default function AdminsMembers({
       socket.off("getUserById");
       socket.off("getChannelById");
       socket.off("GetChannelAdmins");
-
-      setMembers([]);
-      setAdmins([]);
       setDisableListMembers(false);
     };
   }, [channelId]);
 
-  const makeAdmin = (member: string, channelId: string) => {
-    setSender(user?.username);
-    setMember(member);
+  const makeAdmin = (channelId: string) => {
+
+    const sender = username; // set same samiya for backend
     socket.emit("makeAdmin", { sender, member, channelId });
     socket.on("makeAdmin", (data: any) => {
-      console.log("fuck data: ", data);
       if (!data) {
-        alert("you are not the owner or admin of the channel");
+        setAnnoncement("you are can not make the member admin");
       } else if (data === "you can not make your self admin") {
-        alert("you can not make your self admin");
+        setAnnoncement("you can not make your self admin");
       } else {
-        alert("admin added");
+        setAnnoncement("admin added");
         listAdmins(channelId)
       }
-      setSetting(!Setting);
     });
     return () => {
       socket.off("makeAdmin");
     }
   };
 
-  const kickMember = (member: string, channelId: string) => {
-    setSender(user?.username);
-    setMember(member);
+  const kickMember = (channelId: string) => {
+
+    const sender = username; // set same samiya for backend
     socket.emit("kickMember", { sender, member, channelId });
     socket.on("kickMember", (data: any) => {
       if (!data) {
-        alert("you are not the owner or admin of the channel");
-        return;
+        setAnnoncement("you are can not kick the member");
       } else if (data === "you can not kick your self")
       {
-        alert("you can not kick yoursef");
-        return;
+        setAnnoncement("you can not mute yoursef");
       }
       else{
-        alert("member kicked");
+        setAnnoncement("member kicked");
         listMembers(channelId);
       }
-      setSetting(!Setting);
     });
     return () => {
       socket.off("kickMember");
     }
   };
 
-  const BanMember = (member: string, channelId: string) => {
-    setSender(user?.username);
-    setMember(member);
+  const BanMember = (channelId: string) => {
+
+    const sender = username; // set same samiya for backend
+    console.log("user ", username, "banned member ", member, "in channel ", channelId)
     socket.emit("BanMember", { sender, member, channelId });
     socket.on("BanMember", (data: any) => {
+      console.log("data", data)
       if (!data) {
-        alert("you can't ban the member");
-        return;
+        setAnnoncement("you can't ban the member");
       }else if (data === "you can not ban your self") {
-        alert("you can not ban your self");
-        return;
+        setAnnoncement("you can not ban your self");
       } else {
-        alert("member banned");
         listMembers(channelId);
+        setAnnoncement("member banned");
       }
-      setSetting(!Setting);
     });
     return () => {
       socket.off("BanMember");
     }
   };
 
+  const wait = (duration : any) => new Promise(resolve => setTimeout(resolve, duration));
+
+
+  const timeToUnmute = async () => {
+    const muteDuration = 20 * 1000; // 20 seconds
+    const sender = username; // set same samiya for backend
+    
+    // Wait for the specified duration
+    await wait(muteDuration);
+  
+    
+    // setMuted(true);
+    const Muted = true;
+    console.log("member", member, "unmuted by", sender, "in channel", channelId, "muted", Muted);
+    socket.emit("MuteMember", { sender, member, channelId, Muted });
+    setAnnoncement("member " + member + " has been unmuted");
+  };
+
+  const MuteMember = ( channelId: string) => {
+
+    if (!username || !member || !channelId) return;
+    const sender = username; // set same samiya for backend
+    socket.emit("MuteMember", { sender, member, channelId, Muted });
+    socket.on("MuteMember", (data: any) => {
+      if (data === "owner muted member") {
+        setShowTimeMuted(!ShowTimeMuted);
+        listMembers(channelId);
+        setAnnoncement("member " + member + " muted for 20 seconds");
+        timeToUnmute();
+      } else if (data === "admin muted member") {
+        setShowTimeMuted(!ShowTimeMuted);
+        listMembers(channelId);
+        setAnnoncement("admin muted member");
+        timeToUnmute();
+      }else if (data === "you can not mute an admin or owner"){
+        setAnnoncement("you can not mute an admin or owner");
+        return;
+      }
+      else if (data === "you can not mute your self") {
+        setAnnoncement("you can not mute your self");
+      } else {
+        setJustMemebre(!justMemebre);
+        return;
+      }
+    });
+
+
+    return () => {
+      socket.off("MuteMember");
+    }
+  };
+
+
 
   const close = () => {
+    setSetting(!Setting);
+    setShowTimeMuted(!ShowTimeMuted);
+    setJustMemebre(false);
+    setAnnoncement("");
+    setMuted(false);
+  };
+
+  const saveSender = (member: string) => {
+    console.log("member", member)
+    setMember(member);
     setSetting(!Setting);
   };
 
@@ -192,7 +246,7 @@ export default function AdminsMembers({
           </button>
           {showMembersAndAdminsCmp && (
             <div
-              className="bg-slate-900 rounded-2xl border border-gray-700 adminMembers
+              className="bg-slate-900 rounded-2xl border border-gray-700  adminMembers
     "
             >
               {!isDirectMessage ? (
@@ -233,7 +287,7 @@ export default function AdminsMembers({
                   </h3>
 
                   {members?.map((member, index) => (
-                    <div key={member?.username} className="ml-8 w-56 mb-5">
+                    <div key={member.username} className="ml-8 w-56 mb-5">
                       <div
                         className="flex flex-row items-center "
                       >
@@ -244,7 +298,7 @@ export default function AdminsMembers({
                         />
                         <button
                           className="border rounded-3xl text-sm p-1 ml-6 border-gray-700 hover:bg-gray-700 "
-                          onClick={() => setSetting(!Setting)}
+                          onClick={() => saveSender(member?.username)}
                         >
                           <img
                             className="h-7 w-7 bg-slate-300 rounded-2xl hover:bg-green-400"
@@ -260,11 +314,11 @@ export default function AdminsMembers({
                       </div>
 
                       {Setting && (
-                        <div className="absolute top-0 right-0 bottom-0 bg-slate-800 w-[400px] h-[810px] rounded-lg flex flex-col items-center justify-center">
+                        <div className="absolute top-0 right-0 bottom-0 bg-gradient-to-l from-gray-900 via-slate-900 to-slate-800 w-[400px] h-[825px] rounded-lg flex flex-col items-center justify-center">
                           <button
                             className="bg-slate-900 text-white rounded-lg px-4 py-2 my-2 mb-2 w-96 font-sans border border-gray-700 hover:bg-gray-700"
                             onClick={() =>
-                              makeAdmin(member.username, channelId)
+                              makeAdmin(channelId)
                             }
                           >
                             Make Admin
@@ -273,7 +327,7 @@ export default function AdminsMembers({
                             className="bg-slate-900 text-white rounded-lg px-4 py-2 my-2 mb-2 w-96 font-sans border  border-gray-700 hover:bg-gray-700
                   "
                             onClick={() =>
-                              kickMember(member.username, channelId)
+                              kickMember(channelId)
                             }
                           >
                             Kick User
@@ -282,12 +336,29 @@ export default function AdminsMembers({
                             className="bg-slate-900 text-white rounded-lg px-4 py-2 my-2 mb-2 w-96 font-sans border  border-gray-700 hover:bg-gray-700
                   "
                             onClick={() =>
-                              BanMember(member.username, channelId)
+                              BanMember(channelId)
                             }
                           >
                             Ban User
                           </button>
-
+                          <button
+                            className="bg-slate-900 text-white rounded-lg px-4 py-2 my-2 mb-2 w-96 font-sans border  border-gray-700 hover:bg-gray-700
+                  "
+                            onClick={() =>
+                              MuteMember(channelId)
+                            }
+                          >
+                            Mute User
+                          </button>
+                          
+                            <div className="flex flex-col items-center justify-center">
+                              <h6 className="text-white font-thin text-base">
+                                <span className="text-red-500">
+                                  {annoncement}
+                                </span>
+                              </h6>
+                            </div>
+                        
                           <button
                             className=" mr-70 border rounded-3xl text-sm p-1 max-w-20 border-gray-700 hover:bg-gray-700 "
                             onClick={() => close()}

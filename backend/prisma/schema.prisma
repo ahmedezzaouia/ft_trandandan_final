@@ -85,6 +85,7 @@ model ChannelMembership {
   isAdmin        Boolean  @default(false)
   isKicked       Boolean  @default(false)
   isBanned       Boolean  @default(false)
+  isMuted        Boolean  @default(false)
   time           DateTime?
   channelId      String
   
