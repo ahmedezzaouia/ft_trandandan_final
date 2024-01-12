@@ -281,13 +281,6 @@ export default function ChatContent({
         const usernameFromServer = data.msg[0]?.user?.username;
         const usernameFromSession = username;
 
-        if (data.msg.length === 0 || serverChannel !== staticChannelName) {
-          //todo i stoped here
-          setSenderMessages([]);
-          setRecieverMessages([]);
-          setArrayMessages([]);
-          return;
-        }
         if (serverChannel === staticChannelName) {
           if (usernameFromServer !== usernameFromSession) {
             // i return 2 arrays one for the sender and the other for the reciever and i check if the username is the sender or the reciever to set the messages

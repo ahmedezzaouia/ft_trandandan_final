@@ -33,17 +33,17 @@ const ProfileCover = ({ user }: ProfileCoverProps) => {
             <p className="profile-scores_item flex">
               <img src="/assets/level-icon.svg" alt=""/>
               Level
-              <span className="font-bold text-black dark:text-white">34</span>
+              <span className="font-bold text-black dark:text-white">{user.level}</span>
             </p>
             <p className="profile-scores_item flex">
               <img src="/assets/win-icon.svg" alt="" />
               Wons
-              <span className="font-bold text-black dark:text-white">455</span>
+              <span className="font-bold text-black dark:text-white">{user.gamesWon.length}</span>
             </p>
             <p className="profile-scores_item flex">
               <img src="/assets/lost-icon.svg" alt=""/>
               Lost
-              <span className="font-bold text-black dark:text-white">9.3</span>
+              <span className="font-bold text-black dark:text-white">{user.gamesLost.length}</span>
             </p>
           </div>
         </div>

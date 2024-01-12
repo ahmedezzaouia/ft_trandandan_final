@@ -28,7 +28,10 @@
     line-height: normal;
     letter-spacing: 0.025px;
 }
-
+.achievements__img{
+    width: 80px;
+    height: 80px;
+}
 .achievements-description {
     color: #9098A3;
     font-feature-settings: 'clig' off, 'liga' off;

@@ -14,15 +14,61 @@ export class UserService {
     private config: ConfigService,
   ) {}
 
-  async getUser(id: string): Promise<User> {
+  async getUser(id: string): Promise<any> {
     let user: User;
     try {
       user = await this.prisma.user.findUnique({
         where: { id },
+        include: {
+          channel: true,
+          channelMessage: true,
+          acceptedChannelInvite: true,
+          channelMemberships: true,
+          senderInvitesChannel: true,
+          receiverInvitesChannel: true,
+          gameInvitesSender: true,
+          gameInvitesReceived: true,
+          sentDirectMessages: true,
+          receivedDirectMessages: true,
+          friends: true,
+          friendsOf: true,
+          senderRequests: true,
+          receiverRequests: true,
+          blocker: true,
+          getblocked: true,
+          gamesWon: true,
+          gamesLost: true,
+          games: {
+            include: {
+              user: true,
+              oppenent: true,
+              winner: true,
+              loser: true,
+            },
+          },
+          oppenentgamesplayed: {
+            include: {
+              user: true,
+              oppenent: true,
+              winner: true,
+              loser: true,
+            },
+          },
+        }
       });
       if (!user) throw new Error('User not found');
       delete user.twoFactorsSecret;
-      return user;
+      const users: User[] = await this.prisma.user.findMany({});
+      if (!users) {
+        throw new Error('Fetching all users failed');
+      }
+      const sortedUsers = users.sort((a, b) => b.total_goals - a.total_goals);
+      const userIndex = sortedUsers.findIndex(user => user.id === id);
+      if (userIndex === -1) {
+        throw new Error('User in the sorted array of leaderboard not found');
+      }
+      const level:number = userIndex + 1;
+      return { ...user, level};
     } catch (error) {
       throw new HttpException(
         {
@@ -131,6 +177,42 @@ export class UserService {
     try {
       user = await this.prisma.user.findUnique({
         where: { id },
+        include: {
+          channel: true,
+          channelMessage: true,
+          acceptedChannelInvite: true,
+          channelMemberships: true,
+          senderInvitesChannel: true,
+          receiverInvitesChannel: true,
+          gameInvitesSender: true,
+          gameInvitesReceived: true,
+          sentDirectMessages: true,
+          receivedDirectMessages: true,
+          friends: true,
+          friendsOf: true,
+          senderRequests: true,
+          receiverRequests: true,
+          blocker: true,
+          getblocked: true,
+          gamesWon: true,
+          gamesLost: true,
+          games: {
+            include: {
+              user: true,
+              oppenent: true,
+              winner: true,
+              loser: true,
+            },
+          },
+          oppenentgamesplayed: {
+            include: {
+              user: true,
+              oppenent: true,
+              winner: true,
+              loser: true,
+            },
+          },
+        }
       });
       if (!user) throw new Error('User not found');
       delete user.twoFactorsSecret;

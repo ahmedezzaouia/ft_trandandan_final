@@ -12,13 +12,14 @@ export default function Profile() {
 
   const { data: user, error } = useSWR(`http://localhost:3001/user/${userId}`, fetchUser);
 
+  console.log("🚀 ~ Profile ~ user:", user)
   if (error) return <div style={{ color: "red" }}>User not found or failed to load user data</div>;
   if (!user) return <Loading />;
   return (
     <>
       <ProfileCover user={user} />
-      <GameHistory />
-      <Achievements />
+      <GameHistory games={user.games}/>
+      <Achievements user={user}/>
     </>
   );
 }

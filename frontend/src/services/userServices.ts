@@ -50,7 +50,27 @@ export const fetchLoggedUser = async () => {
   }
 };
 
+export const fetchUserLevel = async (userId: string): Promise<number> => {
+  try {
+    const accessToken = localStorage.getItem("accessToken");
+    const response = await fetch(`http://localhost:3001/user/me`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
 
+    if (!response.ok) {
+      throw new Error(`Failed to fetch user level: ${response.statusText}`);
+    }
+
+    const { level } = await response.json();
+
+    return level;
+  } catch (error) {
+    console.log("Error fetching user level", error);
+    throw error;
+  }
+};
 
 export const updateUser = async (updatedUser: {username:string, avatarUrl: string}) => {
   try {
