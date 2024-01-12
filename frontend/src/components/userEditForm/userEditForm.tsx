@@ -57,6 +57,7 @@ const UserEditForm = () => {
         setErrorMessage(error.message);
       }
     }
+    window.location.href  = "/profile/" + user?.id;
   }
 
 

@@ -24,13 +24,14 @@ model User {
   channelMemberships     ChannelMembership[]
   senderInvitesChannel   ChannelInvite[]  @relation("senderInvitesChannel")
   receiverInvitesChannel ChannelInvite[]  @relation("receiverInvitesChannel")
+  gameInvitesSender      GameInvite[]     @relation("senderInvites")
+  gameInvitesReceived    GameInvite[]     @relation("receiverInvites")
   sentDirectMessages     DirectMessage[]  @relation("sender")
   receivedDirectMessages DirectMessage[]  @relation("receiver")
   friends                Friends[]        @relation("myfriends")
   friendsOf              Friends[]        @relation("MefriendsOf")
   senderRequests         FriendRequest[]  @relation("senderRequests")
   receiverRequests       FriendRequest[]  @relation("receiverRequests")
-  // notifications          Notification[]
   blocker                BlockedUsers[]   @relation("blocker")
   getblocked             BlockedUsers[]   @relation("Getblocked")
 
@@ -111,7 +112,6 @@ model DirectMessage {
   id         String   @id @default(uuid())
   message    String
   createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
   senderId   String
   sender     User     @relation("sender", fields: [senderId], references: [id])
   receiverId String
@@ -132,7 +132,6 @@ model FriendRequest {
 model Friends {
   id         String   @id @default(uuid())
   createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
   status     String // "online", "offline", "in_game"
   isBlocked  Boolean  @default(false)
   MyfriendId   String
@@ -144,7 +143,6 @@ model Friends {
 model BlockedUsers {
   id         String   @id @default(uuid())
   createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
   blockerUser String
   getblockedid   String
   blocker    User     @relation("blocker", fields: [blockerUser], references: [id])
@@ -164,4 +162,14 @@ model GameHistory {
   loser    User   @relation("lose", fields: [loserId], references: [id])
   user_score Int @default(0)
   opp_score Int  @default(0)
+}
+
+model GameInvite {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  status    String // "pending", "accepted", "rejected"
+  senderId  String
+  sender    User     @relation("senderInvites", fields: [senderId], references: [id])
+  receiverId String
+  receiver  User     @relation("receiverInvites", fields: [receiverId], references: [id])
 }

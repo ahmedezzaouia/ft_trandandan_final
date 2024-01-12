@@ -60,23 +60,14 @@ export default function AddFriends() {
   };
 
   const sendFriendRequest = () => {
-    try {
-     
-      
-     console.log("username", username, receiver, userId);
+    try {    
       socket.emit("getAllUsersFriends", { sender: username });
       socket.on("getAllUsersFriends", (data) => {
-        // console.log("data", data);
         data.map((item :any) => {
-          console.log("item", item.friend.username, receiver);
           if (item.friend.username === receiver) {
             setAccepted(true);
           }
-        });
-
-
-        console.log("friends", friends);
-      }
+        });}
       );
     } catch (error) {
       console.error("Error sending friend request:", error);
@@ -121,7 +112,7 @@ export default function AddFriends() {
     socket.on("inviteToGame", (data) => {
       console.log("data", data);
       if (data) {
-        setBlocked(true);
+        alert("Invitation sent");
       }
     }
     );

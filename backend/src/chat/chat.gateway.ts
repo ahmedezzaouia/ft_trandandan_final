@@ -1911,17 +1911,6 @@ export class ChatGateway implements OnGatewayDisconnect{
       }
 
       this.server.emit('checkIfTheUserIsBlocked', blocked); // this will return all users
-
-      // const blockedUsers = [];
-      // for (let i = 0; i < blocked.length; i++) {
-      //   const blockedUser = await this.prisma.user.findUnique({
-      //     where: {
-      //       id: blocked[i].getblockedid,
-      //     },
-      //   });
-      //   blockedUsers.push(blockedUser);
-      // }
-      // this.server.emit('checkIfTheUserIsBlocked', blockedUsers); // this will return all users
     } catch (error) {
       console.error('Error while fetching user by id:', error);
       throw error;
@@ -1978,6 +1967,26 @@ export class ChatGateway implements OnGatewayDisconnect{
       });
       this.server.emit('getUserStatus', user); // this will return all users
       return user;
+    } catch (error) {
+      console.error('Error while fetching user by id:', error);
+      throw error;
+    }
+  }
+
+  // inviteToGame
+  @SubscribeMessage('inviteToGame')
+  async inviteToGame(
+    @MessageBody()
+    data: {
+      sender: string;
+      receiver: string;
+      status: string;
+    },
+  ) {
+    try {
+      const invite = await this.notificationService.sendInviteToGame(data);
+      this.server.emit('inviteToGame', invite); // this will return all users
+      return invite;
     } catch (error) {
       console.error('Error while fetching user by id:', error);
       throw error;

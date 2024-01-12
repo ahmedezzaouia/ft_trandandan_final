@@ -28,19 +28,19 @@ const ProfileCover = ({ user }: ProfileCoverProps) => {
           <p className="mt-2 text-xl font-medium text-gray-800 dark:text-white">{user.username}</p>
         </div>
 
-        <div className=" w-full p-2 mt-4 rounded-lg">
+        <div className="w-full p-2 mt-4 rounded-lg">
           <div className="profile-scors flex items-center justify-between text-sm text-gray-600 dark:text-gray-200">
-            <p className="profile-scores_item flex flex-col">
+            <p className="profile-scores_item flex">
               <img src="/assets/level-icon.svg" alt=""/>
               Level
               <span className="font-bold text-black dark:text-white">34</span>
             </p>
-            <p className="profile-scores_item flex flex-col">
+            <p className="profile-scores_item flex">
               <img src="/assets/win-icon.svg" alt="" />
               Wons
               <span className="font-bold text-black dark:text-white">455</span>
             </p>
-            <p className="profile-scores_item flex flex-col">
+            <p className="profile-scores_item flex">
               <img src="/assets/lost-icon.svg" alt=""/>
               Lost
               <span className="font-bold text-black dark:text-white">9.3</span>
