@@ -1,5 +1,6 @@
 import socket from "@/services/socket";
 import { channel } from "diagnostics_channel";
+import { redirect } from "next/dist/server/api-utils";
 import { useState, useEffect, use } from "react";
 import { IoClipboardSharp } from "react-icons/io5";
 
@@ -10,8 +11,8 @@ const Notification = ({ user }: { user: any }) => {
   const [channelname, setChannelname] = useState("");
   const [userWhoSendInvite, setUserWhoSendInvite] = useState("");
   const [userWhoWillaAcceptInvite, setUserWhoWillaAcceptInvite] = useState("");
-  const [idOfChannel, setIdOfChannel] = useState("");
-
+  const [userWhoSendInviteToGame, setUserWhoSendInviteToGame] = useState("");
+  const [userWhoWillaAcceptInviteToGame, setUserWhoWillaAcceptInviteToGame] = useState("");
 
   const getAllNotification = () => {
     
@@ -47,6 +48,21 @@ const Notification = ({ user }: { user: any }) => {
 
     });
 
+    // list invite to game 
+    socket.emit("listinviteGame", {username: user?.username});
+    socket.on("listinviteGame", (data) => {
+      data.forEach((element: any) => {
+        socket.emit("getUserById", {id: element?.senderId});
+        socket.on("getUserById", (sender) => {
+          setUserWhoSendInviteToGame(sender?.username);
+        })
+        setUserWhoWillaAcceptInviteToGame(user?.username);
+      }
+      );
+    })
+
+    console.log(userWhoWillaAcceptInviteToGame, userWhoSendInviteToGame);
+
     return () => {
       socket.off("notification");
       socket.off("listinviteChannel");
@@ -75,6 +91,8 @@ const Notification = ({ user }: { user: any }) => {
     setUserWhoSendInvite("");
     setUserWhoWillaAcceptInvite("");
     setNotificationForFriend(!notificationForFriend);
+    setUserWhoSendInviteToGame("");
+    setUserWhoWillaAcceptInviteToGame("");
   }
 
   const saveNewChannelToDB = async (channelName: string) => {
@@ -97,6 +115,20 @@ const Notification = ({ user }: { user: any }) => {
     setNotificationForFriend(!notificationForFriend);
 
     
+  }
+
+  const redirectTogame = () => {
+  //update to accepted
+  // redirect to game
+  socket.emit("inviteToGame", {
+    sender: userWhoSendInviteToGame,
+    receiver: userWhoWillaAcceptInviteToGame,
+    status: "accepted", 
+  });
+
+
+  window.location.href = "/game";
+
   }
   
  
@@ -179,6 +211,31 @@ const Notification = ({ user }: { user: any }) => {
                   <div className="flex items-center">
                     <button className="px-2 py-1 mr-2 text-xs text-green-600 bg-gray-200 rounded-md dark:bg-gray-700 dark:text-green-400"
                     onClick={() => {saveNewChannelToDB(channelname)}}
+                    >
+                      Accept
+                    </button>
+                    <button className="px-2 py-1 text-xs text-red-600 bg-gray-200 rounded-md dark:bg-gray-700 dark:text-red-400"
+                    onClick={() => {emtyBoxOfNotification()}}
+                    >
+                      ignore
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )
+          }
+          {
+           userWhoWillaAcceptInviteToGame &&  user?.username !== userWhoSendInviteToGame  &&
+            (
+              <div className="absolute top-0 right-0 w-64 p-2 mt-10 z-40 bg-white rounded-md shadow-xl dark:bg-gray-800">
+                    <p className="mx-2 text-sm text-gray-800 dark:text-gray-200"> <span
+                    className="text-sm text-gray-800 dark:text-gray-200 font-bold"
+                    >
+                    {userWhoSendInviteToGame}</span> Invite you to play game </p>
+                <div className="flex items-center justify-between mt-2">
+                  <div className="flex items-center">
+                    <button className="px-2 py-1 mr-2 text-xs text-green-600 bg-gray-200 rounded-md dark:bg-gray-700 dark:text-green-400"
+                    onClick={() => {redirectTogame()}}
                     >
                       Accept
                     </button>

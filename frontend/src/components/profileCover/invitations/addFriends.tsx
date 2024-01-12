@@ -104,22 +104,25 @@ export default function AddFriends() {
 
   // Invite to game
   const handleInviteToGame = () => {
-    console.log("username", username, receiver);
     socket.emit("inviteToGame", {
       sender: username,
       receiver: receiver,
+      status: "pending",
     });
     socket.on("inviteToGame", (data) => {
       console.log("data", data);
-      if (data) {
-        alert("Invitation sent");
-      }
     }
     );
+    socket.on("inviteToGame", (data) => {
+      if(data.status === "accepted")
+        window.location.href = "/game";
+    });
+    // list to acepted
     return () => {
       socket.off("inviteToGame");
     }
   };
+
 
   return (
     <>

@@ -285,32 +285,73 @@ export class notificationService {
     // ------------------ invite to game ------------------
     async sendInviteToGame(data: { sender: string; receiver: string;  status: string; }) {
         try{
-            const senderUser = await this.prisma.user.findUnique({
+            if (data.status === "pending") {
+                const senderUser = await this.prisma.user.findUnique({
+                    where: {
+                        username: data.sender,
+                    },
+                });
+                if (!senderUser) {
+                    return;
+                }
+                const reciverUser = await this.prisma.user.findUnique({
+                    where: {
+                        username: data.receiver,
+                    },
+                });
+                if (!reciverUser) {
+                    return;
+                }
+
+                const invite = await this.prisma.gameInvite.create({
+                    data: {
+                        senderId: senderUser.id,
+                        receiverId: reciverUser.id,
+                        status: data.status,
+                    },
+                });
+
+                return invite;
+            }else{
+             // update status   
+             const senderUser = await this.prisma.user.findUnique({
                 where: {
                     username: data.sender,
                 },
             });
             if (!senderUser) {
                 return;
-            }
+            }   
             const reciverUser = await this.prisma.user.findUnique({
                 where: {
                     username: data.receiver,
                 },
             });
+
             if (!reciverUser) {
                 return;
             }
 
-            const invite = await this.prisma.gameInvite.create({
-                data: {
+            const invite = await this.prisma.gameInvite.findFirst({
+                where: {
                     senderId: senderUser.id,
                     receiverId: reciverUser.id,
+                },
+            });
+            if (!invite) {
+                return;
+            }
+            const updateStatus = await this.prisma.gameInvite.update({
+                where: {
+                    id: invite.id,
+                },
+                data: {
                     status: data.status,
                 },
             });
+            return updateStatus;
+            }
 
-            return invite;
 
         }
            

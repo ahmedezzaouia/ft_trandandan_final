@@ -1992,6 +1992,36 @@ export class ChatGateway implements OnGatewayDisconnect{
       throw error;
     }
   }
+
+  // listinviteGame
+  @SubscribeMessage('listinviteGame')
+  async listinviteGame(
+    @MessageBody()
+    data: {
+      username: string;
+    },
+  ) {
+    try {
+      const user = await this.prisma.user.findUnique({
+        where: {
+          username: data.username,
+        },
+      });
+
+      const inviteGame = await this.prisma.gameInvite.findMany({
+        where: {
+          receiverId: user.id,
+          status: 'pending',
+        },
+      });
+
+      this.server.emit('listinviteGame', inviteGame); // this will return all users
+      return inviteGame;
+    } catch (error) {
+      console.error('Error while fetching user by id:', error);
+      throw error;
+    }
+  }
 }
 
 
