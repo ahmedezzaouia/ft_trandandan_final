@@ -21,7 +21,7 @@ model User {
   channel                Channel[]
   channelMessage         ChannelMessage[]
   acceptedChannelInvite  acceptedChannelInvite[]
-  channelMemberships    ChannelMembership[]
+  channelMemberships     ChannelMembership[]
   senderInvitesChannel   ChannelInvite[]  @relation("senderInvitesChannel")
   receiverInvitesChannel ChannelInvite[]  @relation("receiverInvitesChannel")
   sentDirectMessages     DirectMessage[]  @relation("sender")
@@ -30,7 +30,7 @@ model User {
   friendsOf              Friends[]        @relation("MefriendsOf")
   senderRequests         FriendRequest[]  @relation("senderRequests")
   receiverRequests       FriendRequest[]  @relation("receiverRequests")
-  notifications          Notification[]
+  // notifications          Notification[]
   blocker                BlockedUsers[]   @relation("blocker")
   getblocked             BlockedUsers[]   @relation("Getblocked")
 
@@ -39,12 +39,13 @@ model User {
   gamesLost GameHistory[] @relation("lose")
   games GameHistory[] @relation("user1")
   oppenentgamesplayed GameHistory[] @relation("oppenent")
-  total_goals Int?
+  total_goals Int @default(0)
+
 }
 
 model Channel {
   id             String           @id @default(uuid())
-  name           String           //@unique
+  name           String           
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt
   visibility     String @default("public")
@@ -128,14 +129,6 @@ model FriendRequest {
   receiverRequests User     @relation("receiverRequests", fields: [receiverId], references: [id])
 }
 
-model Notification {
-  id        String   @id @default(uuid())
-  createdAt DateTime @default(now())
-  content   String
-  userId    String
-  user      User     @relation(fields: [userId], references: [id])
-}
-
 model Friends {
   id         String   @id @default(uuid())
   createdAt  DateTime @default(now())
@@ -169,6 +162,6 @@ model GameHistory {
   winner   User   @relation("win", fields: [winnerId], references: [id])
   loserId  String
   loser    User   @relation("lose", fields: [loserId], references: [id])
-  user_score Int
-  opp_score Int
+  user_score Int @default(0)
+  opp_score Int  @default(0)
 }

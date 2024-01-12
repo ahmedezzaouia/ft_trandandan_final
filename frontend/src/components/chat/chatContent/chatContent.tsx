@@ -293,20 +293,18 @@ export default function ChatContent({
             // i return 2 arrays one for the sender and the other for the reciever and i check if the username is the sender or the reciever to set the messages
             GetBlockedUsers();
             for (let i = 0; i < data.msg.length; i++) {
-              if (
-                data.msg[i]?.user?.id === getblockedid &&
-                blockerUsername === username
-              ) {
+              if (data.msg[i]?.user?.id === getblockedid && blockerUsername === username) {
                 setSenderMessages(
                   data.msg.filter((message: any) => {
-                    return message.user.username === username;
+                    return message.user.username === username; // filter the blocked user messages
                   })
                 );
                 setAvaterUser(data.msg[0]?.user.avatarUrl);
                 setNameUser(user?.username);
                 // clear the reciever messages
                 setRecieverMessages([]);
-              } else {
+              } 
+              else {
                 setRecieverMessages(data.msg);
                 setAvaterReciever(data.msg[0]?.user.avatarUrl);
                 setNameUser(user?.username);
@@ -314,12 +312,13 @@ export default function ChatContent({
                 setSenderMessages([]);
               }
             }
-          } else {
-            setRecieverMessages(data.msg);
-            setAvaterReciever(data.msg[0]?.user.avatarUrl);
+          } 
+          else {
+            setSenderMessages(data.msg);
+            setAvaterUser(data.msg[0]?.user.avatarUrl);
             setNameUser(user?.username);
-            // clear the sender messages
-            setSenderMessages([]);
+            // clear the reciever messages
+            setRecieverMessages([]);
           }
         }
       }
@@ -401,9 +400,6 @@ export default function ChatContent({
   };
 
   useEffect(() => {
-    // GetBlockedUsers();
-    // checkIfTheUserIsBaned();
-    // checkIfTheUserIsMuted();
     handlelistChannelMessages();
 
     return () => {
@@ -427,14 +423,7 @@ export default function ChatContent({
   }, [isDirectMessage, channel, isCorrectPassword, youAreBaned]);
 
   useEffect(() => {
-    socket.emit("onlineStatus", { username: user?.username, status: "online" });
-    // if user click on close tab or change the url set the status to offline
-    window.addEventListener("beforeunload", () => {
-      socket.emit("onlineStatus", {
-        username: user?.username,
-        status: "offline",
-      });
-    });
+    
     setArrayMessages([]);
     handlelistDirectMessages();
     console.log("reciever", reciever);
@@ -446,6 +435,17 @@ export default function ChatContent({
   const handleNewFriend = () => {
     setNewFriend(!newFriend);
   };
+
+  useEffect(() => {
+    socket.emit("onlineStatus", { username: user?.username, status: "online" });
+    // if user click on close tab or change the url set the status to offline
+    window.addEventListener("beforeunload", () => {
+      socket.emit("onlineStatus", {
+        username: user?.username,
+        status: "offline",
+      });
+    });
+  }, [username]);
 
   return (
     <div className="chat-content flex-1 flex flex-col overflow-hidden rounded-3xl shadow border border-gray-800 ">
@@ -480,8 +480,9 @@ export default function ChatContent({
           }
           {/* <!-- A response message --> */}
         </div>
-      ) : (
+      ) :  !annoncement && (
         // channel messages
+        
         <div className=" p-14 flex-1 overflow-auto" ref={MessageRef}>
           <div className="flex flex-col mb-4 text-sm">
             {isProtected && !isCorrectPassword && (
@@ -555,9 +556,8 @@ export default function ChatContent({
           </div>
         </div>
       )}
-
       {annoncement && (
-        <div className="flex items-center justify-center my-60">
+        <div className="flex items-center justify-center my-96">
           <div className="flex items-center">
             <p className="text-white font-bold mr-4">{annoncement}</p>
             {isMuted && (
@@ -572,9 +572,16 @@ export default function ChatContent({
                 className="w-10 h-10 rounded-full mr-3 bg-slate-400"
               />
             )}
+            {isBlockUser && (
+              <img
+                src="https://cdn3.iconfinder.com/data/icons/flat-actions-icons-9/792/Close_Icon_Dark-512.png"
+                className="w-10 h-10 rounded-full mr-3 bg-slate-400"
+              />
+            )}
           </div>
         </div>
       )}
+
 
       {/* <!-- Chat input --> */}
       {!isProtected && (

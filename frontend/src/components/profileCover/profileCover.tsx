@@ -14,7 +14,7 @@ const ProfileCover = ({ user }: ProfileCoverProps) => {
       <img
         alt="profil"
         src="https://st2.depositphotos.com/17620692/43225/v/450/depositphotos_432259324-stock-illustration-abstract-stripe-blue-background-dynamic.jpg"
-        className="w-full mb-4 rounded-t-lg h-28"
+        className="profile_cover w-full mb-4 rounded-t-lg h-28"
       />
       <div className="profile-items flex flex-col items-center justify-center p-4 -mt-16">
         <div className="profile-avatar">
@@ -31,17 +31,17 @@ const ProfileCover = ({ user }: ProfileCoverProps) => {
         <div className=" w-full p-2 mt-4 rounded-lg">
           <div className="profile-scors flex items-center justify-between text-sm text-gray-600 dark:text-gray-200">
             <p className="profile-scores_item flex flex-col">
-              <Image src="/assets/level-icon.svg" alt="" width={21} height={21} />
+              <img src="/assets/level-icon.svg" alt=""/>
               Level
               <span className="font-bold text-black dark:text-white">34</span>
             </p>
             <p className="profile-scores_item flex flex-col">
-              <Image src="/assets/win-icon.svg" alt="" width={25} height={25} />
+              <img src="/assets/win-icon.svg" alt="" />
               Wons
               <span className="font-bold text-black dark:text-white">455</span>
             </p>
             <p className="profile-scores_item flex flex-col">
-              <Image src="/assets/lost-icon.svg" alt="" width={25} height={25} />
+              <img src="/assets/lost-icon.svg" alt=""/>
               Lost
               <span className="font-bold text-black dark:text-white">9.3</span>
             </p>

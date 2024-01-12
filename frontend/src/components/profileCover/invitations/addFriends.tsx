@@ -110,6 +110,26 @@ export default function AddFriends() {
     }
   };
 
+
+  // Invite to game
+  const handleInviteToGame = () => {
+    console.log("username", username, receiver);
+    socket.emit("inviteToGame", {
+      sender: username,
+      receiver: receiver,
+    });
+    socket.on("inviteToGame", (data) => {
+      console.log("data", data);
+      if (data) {
+        setBlocked(true);
+      }
+    }
+    );
+    return () => {
+      socket.off("inviteToGame");
+    }
+  };
+
   return (
     <>
       {receiver !== username ? (
@@ -142,9 +162,13 @@ export default function AddFriends() {
                     handleBlockUser();
                   } }
                   >
-                    {blocked ? "block User" : "Blocked"}
+                    {blocked ? "Blocked" : "Block User"}
                   </button>
-                  <button className="p-2 px-4 text-xs  mt-3 w-32 border rounded-full shadow-lg  bg-green-500 hover:bg-green-600 text-white font-bold py-2 ">
+                  <button className="p-2 px-4 text-xs  mt-3 w-32 border rounded-full shadow-lg  bg-green-500 hover:bg-green-600 text-white font-bold py-2 "
+                  onClick={() => {
+                    handleInviteToGame();
+                  } }
+                  >
                     invite to game
                   </button>
                 </>

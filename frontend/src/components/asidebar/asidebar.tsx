@@ -10,8 +10,10 @@ import { IoGameController } from "react-icons/io5";
 import Link from "next/link";
 import { useUserStore } from "@/store";
 import { User } from "@/types";
+import dynamic from "next/dynamic";
 
-const AsideBar = () => {
+
+const AsideBarSrr = () => {
   const handleLogoutClick = () => {
     console.log('Custom click event triggered!');
     localStorage.removeItem("accessToken");
@@ -25,7 +27,7 @@ const AsideBar = () => {
       aria-label="Sidebar"
     >
       <div className="logo-container">
-        <Image src={"/assets/logo.png"} alt="Description" width={150} height={150} style={{ height: "auto", width: "auto" }} />
+        <img src="/assets/logo.png" alt="Description"/>
       </div>
       <div className="h-full px-3 pb-4 overflow-y-auto bg-white dark:bg-gray-800">
         <ul className="space-y-2 font-medium">
@@ -67,7 +69,7 @@ const AsideBar = () => {
           </li>
           <li>
             <Link
-              href="#"
+              href="/game"
               className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
             >
               <IoGameController />
@@ -89,5 +91,7 @@ const AsideBar = () => {
     </aside>
   );
 };
+
+const AsideBar = dynamic(() => Promise.resolve(AsideBarSrr), { ssr: false });
 
 export default AsideBar;

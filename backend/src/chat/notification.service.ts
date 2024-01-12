@@ -152,7 +152,6 @@ export class notificationService {
         }
     }
 
-    // ------------------ reject friend ------------------
 
     // ------------------ show invitation channel notification ------------------
     async sendInviteToChannel(data: { channel : string, sender : string, friend : string, status : string }) {
@@ -203,7 +202,6 @@ export class notificationService {
                         status: data.status,
                     },
                 });
-                console.log("updateStatus",updateStatus)
                 return isexist;
 
             }

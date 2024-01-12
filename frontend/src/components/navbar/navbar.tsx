@@ -3,10 +3,10 @@ import React, { useEffect, useState } from "react";
 import "./navbar.css";
 import { useUserStore } from "@/store";
 import { User } from "@/types";
-import Image from "next/image";
 import "flowbite"
 import SearchBar from "./search/searchBar";
 import Notification from "./notification/notification";
+import dynamic from "next/dynamic";
 
 const NavBar = () => {
   const user: User | null = useUserStore((state) => state.user);
@@ -15,15 +15,30 @@ const NavBar = () => {
     console.log("useEffect in navbar render...");
     user && setImage(user.avatarUrl);
   }, [user]);
+  const toggleSideBar = () => {
+    console.log("toggleSideBar");
+    const logoSidebar = document?.getElementById("logo-sidebar");
+    if (logoSidebar)
+    {
+      logoSidebar.classList.toggle("-translate-x-full");
+    }
+  }
+  document.querySelector("body")?.addEventListener('click', (e) => {
+    const logoSidebar = document.getElementById("logo-sidebar");
+    if (logoSidebar){
+      if (e.target !== logoSidebar && !logoSidebar?.contains(e.target as Node)) {
+        logoSidebar.classList.add("-translate-x-full");
+      }
+    }
+  })
   return (
     <nav className="fixed top-0 z-50 w-full bg-white border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700">
       <div className="px-3 py-3 lg:px-5 lg:pl-3">
         <div className="nav-items flex items-center justify-between">
           <div className="nav-logo flex items-center justify-start">
             <button
-              data-drawer-target="logo-sidebar"
-              data-drawer-toggle="logo-sidebar"
               type="button"
+              onClick={toggleSideBar}
               className="inline-flex items-center p-2 text-sm text-gray-500 rounded-lg sm:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600"
             >
               <span className="sr-only">Open sidebar</span>
@@ -49,62 +64,16 @@ const NavBar = () => {
                   type="button"
                   className="flex text-sm bg-gray-800 rounded-full focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600"
                   aria-expanded="false"
-                  // data-dropdown-toggle="dropdown-user"
                 >
                   <span className="sr-only">Open user menu</span>
 
-                  {image &&<Image
+                  {image &&<img
                     className="w-8 h-8 rounded-full"
                     src={image}
-                    width={30}
-                    height={30}
                     alt="user photo"
                   />}
                 </button>
               </div>
-              {/* <div
-                className="z-50 hidden my-4 text-base list-none bg-white divide-y divide-gray-100 rounded shadow dark:bg-gray-700 dark:divide-gray-600"
-                id="dropdown-user"
-              >
-                <ul className="py-1" role="none">
-                  <li>
-                    <a
-                      href="#"
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white"
-                      role="menuitem"
-                    >
-                      Dashboard
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      href="#"
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white"
-                      role="menuitem"
-                    >
-                      Settings
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      href="#"
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white"
-                      role="menuitem"
-                    >
-                      Earnings
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      href="#"
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white"
-                      role="menuitem"
-                    >
-                      Sign out
-                    </a>
-                  </li>
-                </ul>
-              </div> */}
             </div>
             <Notification user={user}/>
           </div>
@@ -114,4 +83,7 @@ const NavBar = () => {
   );
 };
 
-export default NavBar;
+const NavBarr = dynamic(() => Promise.resolve(NavBar), { ssr: false });
+
+export default NavBarr;
+

@@ -87,11 +87,11 @@
     background-color: #ED4C5C;
 }
 
-.profile-items .profile-avatar img {
-    height: 100px;
-    width: 100px;
+.profile-scors img {
+    height: 40px;
+    width: 40px;
    
 }
-.profileCover img {
+.profileCover .profile_cover {
     height: 12rem;
 }
