@@ -20,7 +20,12 @@
 
 }
 
-
+@media screen and (min-width: 768px){
+   .list-div{
+    width: 251px;
+    margin: 0 20px;
+   }
+}
 @media screen and (max-width: 768px){
     .page-parent{
         padding: 0 !important;
