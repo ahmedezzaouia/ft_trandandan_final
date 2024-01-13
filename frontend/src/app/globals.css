@@ -174,7 +174,8 @@ body {
 /* global style  */
 
 .page-container{
-  margin: 0px !important;
+  max-width: 1500px;
+  margin: auto !important;
   border: none;
 }
 section{

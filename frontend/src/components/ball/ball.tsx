@@ -7,8 +7,8 @@ interface BallProps {
 
 const Ball: React.FC<BallProps> = ({ x, y }) => {
   const ballStyle: React.CSSProperties = {
-    width: '15px',
-    height: '15px',
+    width: '30px',
+    height: '30px',
     backgroundColor: 'white',
     borderRadius: '50%',
     border: '2px solid #6e7379',

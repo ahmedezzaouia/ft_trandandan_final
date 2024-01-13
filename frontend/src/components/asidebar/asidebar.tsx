@@ -7,7 +7,6 @@ import { ImProfile } from "react-icons/im";
 import { BsChatRightDots } from "react-icons/bs";
 import { RiUserSettingsFill } from "react-icons/ri";
 import { IoGameController } from "react-icons/io5";
-import Link from "next/link";
 import { useUserStore } from "@/store";
 import { User } from "@/types";
 import dynamic from "next/dynamic";
@@ -32,59 +31,59 @@ const AsideBarSrr = () => {
       <div className="h-full px-3 pb-4 overflow-y-auto bg-white dark:bg-gray-800">
         <ul className="space-y-2 font-medium">
           <li>
-            <Link
+            <a
               href="/dashboard"
               className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
             >
               <BiSolidDashboard />
               <span className="ml-3">Dashboard</span>
-            </Link>
+            </a>
           </li>
           <li>
-            <Link
+            <a
               href={`/profile/${user?.id}`}
               className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
             >
               <ImProfile />
               <span className="flex-1 ml-3 whitespace-nowrap">Profile</span>
-            </Link>
+            </a>
           </li>
           <li>
-            <Link
+            <a
               href={`/chat/${user?.id}`}
               className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
             >
               <BsChatRightDots />
               <span className="flex-1 ml-3 whitespace-nowrap">Chat</span>
-            </Link>
+            </a>
           </li>
           <li>
-            <Link
+            <a
               href="/settings"
               className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
             >
               <RiUserSettingsFill />
               <span className="flex-1 ml-3 whitespace-nowrap">Settings</span>
-            </Link>
+            </a>
           </li>
           <li>
-            <Link
+            <a
               href="/game"
               className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
             >
               <IoGameController />
               <span className="flex-1 ml-3 whitespace-nowrap">Plag Game</span>
-            </Link>
+            </a>
           </li>
           <li>
-            <Link
+            <a
               href="/"
               className="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
               onClick={handleLogoutClick}
             >
               <BiLogOut />
               <span className="flex-1 ml-3 whitespace-nowrap">Logout</span>
-            </Link>
+            </a>
           </li>
         </ul>
       </div>

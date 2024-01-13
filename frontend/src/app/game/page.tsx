@@ -102,8 +102,10 @@ const HomePage: React.FC = () => {
       };
       socket.on('userposition', hundler);
       const move = (evt: any) => {
-        let pos = evt.clientY - 100;
-        socket.emit('dataofmouse', pos);
+        let pos = evt.clientY - 300;
+        // console.log(evt.clientY);
+        if (evt.clientY > 300 && evt.clientY < 900)
+          socket.emit('dataofmouse', pos);
       }
       window.addEventListener("mousemove", move);
       const ballposition = {x: players.ball.x, y: players.ball.y};
@@ -139,20 +141,24 @@ const HomePage: React.FC = () => {
               onStartGame={handleStartGame}
             />
           ) : (
+            <>
+              <div>
+            <Score leftScore={player1Score} rightScore={player2Score} />
+              </div>
             <div className="gameArea" style={{ backgroundImage: selectedMap ? `url(${maps.find((map) => map.id.toString() === selectedMap)?.imageUrl})` : 'none' }}>
                 {isPlayer1Joined && isPlayer2Joined ? (
-                <>
-                  <Score leftScore={player1Score} rightScore={player2Score} />
-                  <Ball x={ballPosition.x} y={ballPosition.y} />
-                  <Bar position={player1Position} left={true} />
-                  <Bar position={player2Position} left={false} />
-                  {/* <Delay stat={players.delay}/> */}
-                  <div className="verticalLine"></div>
-                </>
+                  <>
+                    <Ball x={ballPosition.x} y={ballPosition.y} />
+                    <Bar position={player1Position} left={true} />
+                    <Bar position={player2Position} left={false} />
+                    {/* <Delay stat={players.delay}/> */}
+                    <div className="verticalLine"></div>
+                  </>
               ) : (
                 <WaitStage />
-              )}
+                )}
             </div>
+          </>
           )}
         </div>
       </main>
