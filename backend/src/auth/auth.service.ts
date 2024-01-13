@@ -10,7 +10,6 @@ export class AuthService {
 
   callback(@Res() res, @Req() req) {
     const user = req.user;
-    console.log("🚀 ~ AuthService ~ callback ~ user:", user)
     if (user.isTwofactorsEnabled) {
       return res.redirect(`http://localhost:3000/twofactors?id=${user.id}`);
     } else {

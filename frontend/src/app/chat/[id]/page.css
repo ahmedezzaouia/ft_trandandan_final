@@ -7,8 +7,6 @@
     flex-direction: row;
     justify-content: center;
     align-items: center;
-    
-
 }
 
 
@@ -23,12 +21,29 @@
 }
 
 
-@media screen and (max-width: 1535px){
-    /* .admin-div{
-        display: none;
-    } */
-
-    .list-div{
-        max-width: 35vw !important;
+@media screen and (max-width: 768px){
+    .page-parent{
+        padding: 0 !important;
     }
+    .chat-container{
+        height: auto !important;
+
+    }
+    .chat-container > div{
+        flex-direction: column;
+    }
+    .list-div{
+        height: 200px;
+        overflow-y: auto;
+        margin: auto;
+        width: 100%;
+        
+    }
+    .chat-content{
+        margin-top: 20px;
+        height: 500px;
+        display: block;
+        width: 100%;
+    }
+
 }

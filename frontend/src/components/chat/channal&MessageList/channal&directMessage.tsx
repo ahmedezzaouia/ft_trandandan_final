@@ -290,7 +290,7 @@ export default function ChannalAndDirectMessage({
   }, [username, Islogout, isAlert]);
 
   return (
-    <div className="list-div bg-slate-900 mr-8  w-80   text-purple-lighter rounded-2xl overflow-hidden border border-gray-800 ">
+    <div className="list-div bg-slate-900 mr-8 text-purple-lighter rounded-2xl overflow-hidden border border-gray-800 ">
       {/* <!-- Sidebar Header --> */}
 
       {/* channels  */}

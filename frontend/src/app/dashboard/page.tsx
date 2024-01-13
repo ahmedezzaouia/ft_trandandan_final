@@ -40,7 +40,7 @@ export default function Dashboard() {
       <div className="dashboardGrid">
         <ChallengeFriend />
         <AIopponent />
-        <MatchHistory games={user.games}/>
+        {user.games && <MatchHistory games={user.games}/>}
         {user.leaderBoard && <LeaderBoard leaderBoard={user.leaderBoard}/>}
         {/* <FriendsList /> */}
       </div>
