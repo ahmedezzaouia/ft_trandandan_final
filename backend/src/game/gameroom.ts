@@ -62,10 +62,10 @@ export default class GameRoom  {
                 clearInterval(room.interval);
                 const winner: User = (room.user1.status) ? room.user1.userdata : room.user2.userdata;
                 const loser: User = (!room.user1.status) ? room.user1.userdata : room.user2.userdata;
-                console.log("9abl\n");
-                console.log('user1 id:',room.user1.userdata.id);
-                console.log('user2 id:',room.user2.userdata.id);
-                const database = await this.prisma.gameHistory.create({
+                // console.log("9abl\n");
+                // console.log('user1 id:',room.user1.userdata.id);
+                // console.log('user2 id:',room.user2.userdata.id);
+                const database1 = await this.prisma.gameHistory.create({
                     data: {
                         user: {
                             connect: { id: room.user1.userdata.id }
@@ -81,6 +81,24 @@ export default class GameRoom  {
                         },
                         user_score: room.user1.score,
                         opp_score: room.user2.score
+                    }
+                });
+                const database2 = await this.prisma.gameHistory.create({
+                    data: {
+                        user: {
+                            connect: { id: room.user2.userdata.id }
+                        },
+                        oppenent: {
+                            connect: { id: room.user1.userdata.id }
+                        },
+                        winner: {
+                            connect: { id: winner.id }
+                        },
+                        loser: {
+                            connect: { id: loser.id }
+                        },
+                        user_score: room.user2.score,
+                        opp_score: room.user1.score
                     }
                 });
                 const user1 = await this.prisma.user.findUnique({where:{id: room.user1.userdata.id}})

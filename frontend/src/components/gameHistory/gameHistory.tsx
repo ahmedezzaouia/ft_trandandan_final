@@ -8,11 +8,15 @@ const GameHistory = ({ games }: any) => {
   return (
     <section id="gameHistory">
       <h2 className="section-title">Game History</h2>
-      <div className="gameHistory-items">
-        {limitedGames.map((game: any, index: number) => (
-          <GameItem game={game} key={index}/>
-        ))}
-      </div>
+      {games.length === 0 ? (
+        <p>No game history available.</p>
+      ) : (
+        <div className="gameHistory-items">
+          {limitedGames.map((game: any, index: number) => (
+            <GameItem game={game} key={index} />
+          ))}
+        </div>
+      )}
     </section>
   );
 };

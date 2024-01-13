@@ -22,7 +22,7 @@ const Leaderboard = ({ leaderBoard }: any) => (
                       Name
                     </th>
                     <th className="h-12 px-4 align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0 text-right">
-                      Points
+                      Goals
                     </th>
                   </tr>
                 </thead>

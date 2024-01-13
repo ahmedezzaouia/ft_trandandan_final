@@ -59,7 +59,7 @@ export default function AddFriends() {
     setFriendRequestSent(true);
   };
 
-  const sendFriendRequest = () => {
+  const getAllUsersFriends = () => {
     try {    
       socket.emit("getAllUsersFriends", { sender: username });
       socket.on("getAllUsersFriends", (data) => {
@@ -75,9 +75,10 @@ export default function AddFriends() {
   };
 
   useEffect(() => {
-    sendFriendRequest();
+    getAllUsersFriends();
     return () => {
       socket.off("sendFriendRequest");
+      socket.off("getAllUsersFriends");
     };
   }, [username, receiver, userId]);
 
