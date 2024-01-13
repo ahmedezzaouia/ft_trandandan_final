@@ -15,7 +15,7 @@
     overflow-y: hidden;
     width: 100%;
     flex-direction: column;
-    width: 900px;
+    max-width: 900px;
 }
 
 

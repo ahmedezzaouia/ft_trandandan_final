@@ -10,6 +10,13 @@ export default function SearchBar() {
 
     // fetch data from backend
     const search = (e : any) => {
+        
+        if (e.target.value === '') {
+            setInput('')
+            setUsername('')
+            setSearchResult([])
+            return ;
+        }
         setInput(e.target.value)
         setUsername(e.target.value)
         if (input === '') {
@@ -23,9 +30,7 @@ export default function SearchBar() {
             const userId = filteredData[0]?.id;
             setSearchResult(filteredData)
             setUserId(userId)
-        })
-
-        input === '' && setSearchResult([])
+        })        
     }
 
     return (
@@ -72,7 +77,7 @@ export default function SearchBar() {
                         Search
                     </button>
                 </div>
-                <SearchResult searchResult={searchResult} userId={userId}/>
+                {searchResult.length > 0 && <SearchResult searchResult={searchResult} userId={userId}/>}
             </form>
         </div>
     )

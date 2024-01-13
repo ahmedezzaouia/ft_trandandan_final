@@ -66,6 +66,10 @@
     justify-content: center;
     gap: 1rem;
 }
+.invite-btns{
+    display: flex;
+    gap: 1rem;
+  }
 }
 
 .profile-scores_item {

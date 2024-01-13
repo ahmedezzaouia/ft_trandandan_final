@@ -148,7 +148,7 @@ export default function AddFriends() {
             </button>
           </div>
         ) : (
-          <div>
+          <div className="invite-btns">
             <>
               {accepted && (
                 <>

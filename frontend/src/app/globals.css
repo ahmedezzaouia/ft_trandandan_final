@@ -193,3 +193,20 @@ section{
 }
 
 
+
+.search-users{      
+  position: absolute;
+  background: #141627;
+  z-index: 550;
+  width: 100vw;
+  height: 100vh;
+  left: 0;
+  top: 100px;
+}
+
+@media screen and (min-width: 768px){
+  .search-users{
+    width: 50%;
+    transform: translate(50%, 0);
+  }
+}
