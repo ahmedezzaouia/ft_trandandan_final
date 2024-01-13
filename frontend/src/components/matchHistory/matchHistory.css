@@ -1,6 +1,6 @@
 /* MatchHistory.css */
 .matchHistory {
-    background-color: #15224d;
+    background-color: #141627;
     opacity: 0.75;
     border-radius: 0.5rem;
     overflow: hidden;
@@ -9,7 +9,8 @@
     /* background-image: url('/pi4.png'); */
     background-size: 136%;
     background-repeat: no-repeat;
-
+    height: 400px;
+    overflow-y: auto;
 }
 
 .mhtitle {

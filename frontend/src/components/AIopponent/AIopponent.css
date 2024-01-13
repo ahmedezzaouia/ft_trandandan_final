@@ -1,13 +1,15 @@
 .aiSection {
-    background-color: #15224d;
+    background-color: #141627;
     border-radius: 0.5rem;
     overflow: hidden;
     box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.2);
+    height: 400px;
+    overflow-y: auto;
   }
   
   .image {
     width: 100%;
-    height: 10rem;
+    height: 200px;
     object-fit: cover;
   }
   
@@ -28,7 +30,7 @@
   }
   
   .playButton {
-    background-color: #f79c14;
+    background-color: #EB5560;
     color: white;
     padding: 0.5rem 1rem;
     border-radius: 0.25rem;

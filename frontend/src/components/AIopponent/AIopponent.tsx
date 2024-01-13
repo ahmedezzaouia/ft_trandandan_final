@@ -1,5 +1,7 @@
 import React from 'react';
 import  './AIopponent.css';
+import Link from 'next/link';
+
 
 const AIopponent = () => (
   <div className='aiSection'>
@@ -7,7 +9,7 @@ const AIopponent = () => (
     <div className='content'>
       <h3 className='title'>Face Our AI Opponent!</h3>
       <p className='description'>Challenge our AI opponent and test your ping pong skills</p>
-      <button className='playButton'>Play</button>
+      <Link href='/game' className='playButton'>Play</Link>
     </div>
   </div>
 );
