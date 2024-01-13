@@ -6,7 +6,7 @@
     overflow: hidden;
     height: auto;
     grid-column: span 1;
-    background-image: url('/pi4.png');
+    /* background-image: url('/pi4.png'); */
     background-size: 136%;
     background-repeat: no-repeat;
 

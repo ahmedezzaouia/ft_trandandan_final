@@ -68,7 +68,7 @@ export class UserService {
         throw new Error('User in the sorted array of leaderboard not found');
       }
       const level:number = userIndex + 1;
-      return { ...user, level};
+      return { ...user, level,leaderBoard:sortedUsers};
     } catch (error) {
       throw new HttpException(
         {
@@ -171,9 +171,9 @@ export class UserService {
     }
   }
 
-  async getMe(id: string): Promise<User> {
+  async getMe(id: string): Promise<any> {
     console.log('getMe id :: ', id, ' ::');
-    let user: User;
+    let user: any;
     try {
       user = await this.prisma.user.findUnique({
         where: { id },
@@ -216,7 +216,12 @@ export class UserService {
       });
       if (!user) throw new Error('User not found');
       delete user.twoFactorsSecret;
-      return user;
+      const users: User[] = await this.prisma.user.findMany({});
+      if (!users) {
+        throw new Error('Fetching all users failed');
+      }
+      const sortedUsers = users.sort((a, b) => b.total_goals - a.total_goals);
+      return { ...user,leaderBoard:sortedUsers};
     } catch (error) {
       throw new HttpException(
         {

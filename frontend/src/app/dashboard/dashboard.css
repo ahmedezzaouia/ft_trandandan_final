@@ -5,7 +5,10 @@
     grid-gap: 16px;
     max-width: 1200px;
   }
-  
+.dashBoard_game_img{
+  height: 30px;
+  width: 30px;
+}
   @media (min-width: 768px) {
     .dashboardGrid {
       grid-template-columns: repeat(3, 1fr); /* Adjust for three columns */
@@ -16,4 +19,13 @@
     .dashboardGrid {
       grid-template-columns: repeat(3, 1fr); /* Adjust for three columns */
     }
+}
+
+
+@media (max-width: 768px) {
+  .dashboardGrid {
+    display: flex;
+    flex-direction: column;
+    gap:30px
+  }
 }
