@@ -32,7 +32,7 @@ const ProfileCover = ({ user }: ProfileCoverProps) => {
           <div className="profile-scors flex items-center justify-between text-sm text-gray-600 dark:text-gray-200">
             <p className="profile-scores_item flex">
               <img src="/assets/level-icon.svg" alt=""/>
-              Level
+              Grade
               <span className="font-bold text-black dark:text-white">{user.level}</span>
             </p>
             <p className="profile-scores_item flex">

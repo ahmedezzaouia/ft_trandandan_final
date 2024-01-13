@@ -9,8 +9,21 @@
 
 .gameHistory-items {
     padding: 2rem;
+    display: flex;
+    height: 300px;
+    overflow-x: scroll;
+    overflow-y: hidden;
+    width: 100%;
+    flex-direction: column;
+    width: 900px;
 }
 
+
+@media screen and (max-width: 768px) {
+    .gameHistory-items {
+        width: 300px;
+    }
+}
 .section-title {
     color: #FFF;
     font-size: 25px;

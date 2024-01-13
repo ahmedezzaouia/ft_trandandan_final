@@ -1,4 +1,6 @@
-
+#achievements{
+    margin: auto !important;
+}
 .achievements-items{
     gap: 2rem;
     display: flex;
@@ -7,6 +9,7 @@
     align-items: center;
     /* background: antiquewhite; */
     padding: 2rem;
+    max-width: 600px;
 }
 .achievements-item {
     display: inline-flex;
