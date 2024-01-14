@@ -24,6 +24,7 @@ export default function CreateChannal(props : any) {
     setChannelName('');
     // Close the modal
     setShowModal(false);
+    window.location.reload();
   };
 
 
