@@ -45,7 +45,7 @@ const UserEditForm = () => {
   }, [user]);
 
   const handleUseUpdate = async () => {
-    if (username && image && (user?.username !== username || user?.avatarUrl !== image)) {
+    if (username && image && (user?.username !== username || user?.avatarUrl !== image || user?.isTwofactorsEnabled !== is2FAEnabled)) {
       try {
         const updatedUser = await updateUser({ username, avatarUrl: image });
         console.log("updateUser:", updatedUser);
@@ -57,7 +57,7 @@ const UserEditForm = () => {
         setErrorMessage(error.message);
       }
     }
-    window.location.href  = "/profile/" + user?.id;
+    // window.location.href  = "/profile/" + user?.id;
   }
 
 

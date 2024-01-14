@@ -339,6 +339,10 @@ export class ChatGateway implements OnGatewayDisconnect{
         username: data.sender,
       },
     });
+    if (!user) {
+      console.log('user not found');
+      return;
+    }
     const channels = await this.prisma.channel.findMany({
       where: {
         visibility: 'private',

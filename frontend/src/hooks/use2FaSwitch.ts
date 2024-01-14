@@ -1,3 +1,4 @@
+'use client'
 import { disable2fa, generateQrcodeUrl } from "@/services/twofaServices";
 import { useUserStore } from "@/store";
 import { User } from "@/types";
@@ -9,13 +10,17 @@ interface Use2faSwitchProps {
 
 export const use2FASwitch = ({ onEnable }: Use2faSwitchProps) => {
   const [is2FAEnabled, setIs2FAEnabled] = useState(false);
-  const user: User | null = useUserStore((state) => state.user);
+  const user:User | null= useUserStore((state) => state.user);
+  const getUser= useUserStore((state) => state.getUser);
 
   useEffect(() => {
-    if (user) {
-      setIs2FAEnabled(user.isTwofactorsEnabled);
-    }
+    getUser();
+  },[]);
+
+  useEffect(() => {
+    user && setIs2FAEnabled(user.isTwofactorsEnabled);
   }, [user]);
+
   const handle2FAToggle = async () => {
     try {
       if (is2FAEnabled === false) {

@@ -31,12 +31,14 @@ export class Passport42Strategy extends PassportStrategy(Strategy, '42') {
     try {
       // console.log(profile._json.image.link);
       const { username, emails } = profile;
+      console.log("🚀 ~ Passport42Strategy  ~ username:", username)
       let firstLogin = false;
       let user = await this.prisma.user.findUnique({
         where: {
           username: username,
         },
       });
+      console.log("🚀 ~ Passport42Strategy ~ classPassport42StrategyextendsPassportStrategy ~ user:", user)
 
       if (!user) {
         user = await this.prisma.user.create({
