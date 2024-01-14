@@ -27,13 +27,13 @@ const HomePage: React.FC = () => {
   const [players, setStr2] = useState<any>({
     user1: {
       x : 0,
-      y : 0,
+      y : 400,
       score : 0,
       user: null
     },
     user2: {
         x : 0,
-        y : 0,
+        y : 400,
         score : 0,
         user: null
     },
@@ -137,12 +137,24 @@ const HomePage: React.FC = () => {
       };
       socket.on('userposition', hundler);
       const move = (evt: any) => {
-        let rect = cvs.getBoundingClientRect();
-        
-        let pos = evt.clientY - rect.top - 100;
-        socket.emit('dataofmouse', pos);
+        let user;
+        if (players.user1.socket == socket.id)
+          user = players.user1;
+        else
+          user = players.user2;
+        if (user.y >= 0 && user.y <= 800){
+          if (evt.keyCode == 40)
+            user.y += 30;
+          else if (evt.keyCode == 38)
+            user.y -= 30;
+        }
+        if (user.y > 600)
+          user.y = 600;
+        if (user.y < 0)
+          user.y = 0;
+        socket.emit('dataofmouse', user.y);
       }
-      window.addEventListener("mousemove", move);
+      window.addEventListener("keydown", move);
       setPlayer1Score(players.user1.score);
       setPlayer2Score(players.user2.score);
   
@@ -174,29 +186,29 @@ const HomePage: React.FC = () => {
       }
       return () => {
         socket.off('userposition', hundler);
-        window.removeEventListener("mousemove", move);
+        window.removeEventListener("keydown", move);
         };
     }
   }, [players, string, isGameStarted]);
   
   if (isGameStarted){
     return (
-      <>
+      <div className="square">
           <Score player1score={players.user1.score} player2score={players.user2.score} player1avatar={players.user1.user?.avatarUrl} player2avatar={players.user2.user?.avatarUrl} isAI={false}/>
           <canvas className="canvas-container" width="1400" height="800" ref={cvsRef}></canvas>
-      </>
+      </div>
     );
   }
   else
   {
     return (
-      <>
+      <div className='square'>
         <MapSelection
           maps={maps}
           onSelectMap={handleSelectMap}
           onStartGame={handleStartGame}
         />
-      </>
+      </div>
     );
   }
 }

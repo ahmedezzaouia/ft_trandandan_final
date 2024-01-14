@@ -60,20 +60,20 @@
   font-size: 50px;
   cursor: pointer;
   color: white;
+  transform: translateY(-100%);
+
 }
 
 .left-arrow {
   position: absolute;
   left: 10px;
   top: 50%;
-  transform: translateY(-50%);
 }
 
 .right-arrow {
   position: absolute;
   right: 10px;
   top: 50%;
-  transform: translateY(-50%);
 }
 
 

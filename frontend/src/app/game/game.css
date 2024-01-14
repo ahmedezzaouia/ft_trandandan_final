@@ -19,10 +19,10 @@
 }
 
 .square {
-  width: 100%;
+  /* width: 100%;
   height: 100%;
-  max-width: 100%;
-  margin: 0 auto;
+  max-width: 100%; */
+  /* margin: 0 auto; */
   /* background-color: #3b3c3d; */
   display: flex;
   justify-content: center;
@@ -94,10 +94,13 @@
 .game_map{
   position: relative;
 }
+.square {
+  width: 60vw;
+  margin: auto;
+}
 @media screen and (max-width: 768px) {
   .square {
-    width: 100%;
-    height: 100%;
+    width: 80vw;
   }
   .game_map{
     padding: 0;

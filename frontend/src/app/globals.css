@@ -243,7 +243,7 @@ section{
   -webkit-clip-path: polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%);
 }
 
-.arrow {
+.landing-page .arrow {
   position: absolute;
   transition: 0.2s;
   background-color: #2761c3;
@@ -252,12 +252,12 @@ section{
   height: 30%;
 }
 
-#leftArrow {
+.landing-page #leftArrow {
   left: -13.5%;
   -webkit-clip-path: polygon(100% 0, 100% 100%, 0 50%);
 }
 
-#rightArrow {
+.landing-page #rightArrow {
   -webkit-clip-path: polygon(100% 49%, 0 0, 0 100%);
   left: 102%;
 }
@@ -274,7 +274,7 @@ button:hover #leftArrow {
   animation: 0.6s ease-in-out both infinite alternate leftArrow8;
 }
 
-.corner {
+.landing-page .corner {
   position: absolute;
   width: 4em;
   height: 4em;
@@ -304,31 +304,31 @@ button:hover #leftArrow {
   left: 88%;
 }
 
-button:hover #leftTop {
+.landing-page button:hover #leftTop {
   animation: 0.1s ease-in-out 0.05s both changeColor8,
   0.2s linear 0.4s both lightEffect8;
 }
 
-button:hover #rightTop {
+.landing-page button:hover #rightTop {
   animation: 0.1s ease-in-out 0.15s both changeColor8,
   0.2s linear 0.4s both lightEffect8;
 }
 
-button:hover #rightBottom {
+.landing-page button:hover #rightBottom {
   animation: 0.1s ease-in-out 0.25s both changeColor8,
   0.2s linear 0.4s both lightEffect8;
 }
 
-button:hover #leftBottom {
+.landing-page button:hover #leftBottom {
   animation: 0.1s ease-in-out 0.35s both changeColor8,
   0.2s linear 0.4s both lightEffect8;
 }
 
-button:hover .corner {
+.landing-page button:hover .corner {
   transform: scale(1.25) rotate(45deg);
 }
 
-button:hover #clip {
+.landing-page button:hover #clip {
   animation: 0.2s ease-in-out 0.55s both greenLight8;
   --color: #27c39f;
 }
@@ -393,4 +393,5 @@ button:hover #clip {
     background-image: url('/ping_pong_desktop.gif');
 
   }
+
 }

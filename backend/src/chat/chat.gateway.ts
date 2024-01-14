@@ -82,7 +82,7 @@ export class ChatGateway implements OnGatewayDisconnect{
       channelId: string;
       message: string;
     },
-    @ConnectedSocket() client: Socket,
+    // @ConnectedSocket() client: Socket,
   ) {
   
     const saveMessage = await this.channelService.createChannelMessage(data);
@@ -100,7 +100,7 @@ export class ChatGateway implements OnGatewayDisconnect{
       sender: string;
       channelId: string;
     },
-    @ConnectedSocket() client: Socket,
+    // @ConnectedSocket() client: Socket,
   ) {
     try {
       // save the messages in an array where ChannelMessage is an object with the message and user
@@ -136,7 +136,7 @@ export class ChatGateway implements OnGatewayDisconnect{
       channelId: string;
       password: string;
     },
-    @ConnectedSocket() client: Socket,
+    // @ConnectedSocket() client: Socket,
   ) {
     if (!data.channel && !data.channelType && !data.sender && !data.channelId) {
       console.log('Channel not found saveChannelName data');
@@ -247,7 +247,7 @@ export class ChatGateway implements OnGatewayDisconnect{
       channelId: string;
       sender: string;
     },
-    @ConnectedSocket() client: Socket,
+    // @ConnectedSocket() client: Socket,
   ) {
     const channel = await this.prisma.channel.findUnique({
       where: {
@@ -276,7 +276,7 @@ export class ChatGateway implements OnGatewayDisconnect{
     data: {
       sender: string;
     },
-    @ConnectedSocket() client: Socket,
+    // @ConnectedSocket() client: Socket,
   ) {
     const channels = await this.prisma.acceptedChannelInvite.findMany({
       where: {
@@ -313,7 +313,7 @@ export class ChatGateway implements OnGatewayDisconnect{
   @SubscribeMessage('listPublicChannels')
   async listPublicChannels(
     @MessageBody() data: { sender: string; },
-    @ConnectedSocket() client: Socket,
+    // @ConnectedSocket() client: Socket,
   ) {
     const channels = await this.prisma.channel.findMany({
       where: {
@@ -332,7 +332,7 @@ export class ChatGateway implements OnGatewayDisconnect{
   @SubscribeMessage('listPrivateChannels')
   async listPrivateChannels(
     @MessageBody() data: { sender: string; },
-    @ConnectedSocket() client: Socket,
+    // @ConnectedSocket() client: Socket,
   ) {
     const user = await this.prisma.user.findUnique({
       where: {
@@ -361,7 +361,7 @@ export class ChatGateway implements OnGatewayDisconnect{
   @SubscribeMessage('listProtectedChannels')
   async listProtectedChannels(
     @MessageBody() data: { sender: string; },
-    @ConnectedSocket() client: Socket,
+    // @ConnectedSocket() client: Socket,
   ) {
     
     const channels = await this.prisma.channel.findMany({
@@ -382,7 +382,7 @@ export class ChatGateway implements OnGatewayDisconnect{
       password: string;
       sender: string;
     },
-    @ConnectedSocket() client: Socket,
+    // @ConnectedSocket() client: Socket,
   ) {
     const user = await this.prisma.user.findUnique({
       where: {
@@ -419,7 +419,7 @@ export class ChatGateway implements OnGatewayDisconnect{
       channelId: string;
       sender: string;
     },
-    @ConnectedSocket() client: Socket,
+    // @ConnectedSocket() client: Socket,
   ) {
     if (!data.channelId && !data.sender) {
       console.log('Channel not found removePassword data');
@@ -481,7 +481,7 @@ export class ChatGateway implements OnGatewayDisconnect{
       password: string;
       sender: string;
     },
-    @ConnectedSocket() client: Socket,
+    // @ConnectedSocket() client: Socket,
   ) {
     if (!data.channelId && !data.password && !data.sender) {
       console.log('Channel not found changePassword data');
@@ -551,7 +551,7 @@ export class ChatGateway implements OnGatewayDisconnect{
     data: {
       id: string;
     },
-    @ConnectedSocket() client: Socket,
+    // @ConnectedSocket() client: Socket,
   ) {
     if (!data.id) {
       console.log('Channel not found getChannelById data');
@@ -1400,7 +1400,7 @@ export class ChatGateway implements OnGatewayDisconnect{
       channelId: string;
       sender: string;
     },
-    @ConnectedSocket() client: Socket,
+    // @ConnectedSocket() client: Socket,
     ) {
       if (!data.channelId && !data.sender) {
         console.log('Channel not found leaveChannel data');
@@ -1489,7 +1489,7 @@ export class ChatGateway implements OnGatewayDisconnect{
   @SubscribeMessage('getAllUsers')
   async listUsers(
     @MessageBody() data: { sender: string },
-    @ConnectedSocket() client: Socket,
+    // @ConnectedSocket() client: Socket,
   ) {
     const users = await this.prisma.user.findMany({
       include: {
@@ -1509,7 +1509,7 @@ export class ChatGateway implements OnGatewayDisconnect{
       reciever: string;
       message: string;
     },
-    @ConnectedSocket() client: Socket,
+    // @ConnectedSocket() client: Socket,
   ) {
     const saveMessage = await this.directMessageService.createDirectMessage(data);
     this.server.emit('directMessage', saveMessage);
@@ -1524,7 +1524,7 @@ export class ChatGateway implements OnGatewayDisconnect{
       sender: string;
       reciever: string;
     },
-    @ConnectedSocket() client: Socket,
+    // @ConnectedSocket() client: Socket,
   ) {
     try {
       // save the messages in an array where ChannelMessage is an object with the message and user
@@ -1557,7 +1557,7 @@ export class ChatGateway implements OnGatewayDisconnect{
     data: {
       user: string;
     },
-    @ConnectedSocket() client: Socket,
+    // @ConnectedSocket() client: Socket,
   ) {
     try {
       const user = await this.prisma.user.findMany({

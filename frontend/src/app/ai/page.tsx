@@ -182,10 +182,18 @@ const HomePage: React.FC = () => {
         }
     };
     const move = (evt: any) => {
-        players.user1.y = evt.clientY - 100;
+      if (players.user1.y >= 0 && players.user1.y <= 800){
+        if (evt.keyCode == 40)
+          players.user1.y += 30;
+        else if (evt.keyCode == 38)
+          players.user1.y -= 30;
+      }
+      if (players.user1.y > 600)
+        players.user1.y = 600;
+      if (players.user1.y < 0)
+        players.user1.y = 0;
     }
-    
-    window.addEventListener("mousemove", move);
+    window.addEventListener("keydown", move);
     const gameloop = () => {
         if (players.timer <= 120) {
             if (!(players.timer % 40)) {
@@ -235,16 +243,16 @@ const HomePage: React.FC = () => {
     }
     let interval = setInterval(gameloop, 1000/60);
     return () => {
-        window.removeEventListener("mousemove", move);
+        window.removeEventListener("keydown", move);
     };
   }, [isGameStarted]);
 
   if (isGameStarted){
     return (
-      <>
+      <div className="square">
           <Score player1score={player1Score} player2score={player2Score} player1avatar={players.user1.user?.avatarUrl} player2avatar={players.user2.user?.avatarUrl} isAI={true}/>
           <canvas className="canvas-container" width="1400" height="800" ref={cvsRef}></canvas>
-      </>
+      </div>
     );
   }
   else
