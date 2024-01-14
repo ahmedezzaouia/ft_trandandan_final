@@ -91,6 +91,9 @@
   height: 100%;
   object-fit: cover;
 }
+.game_map{
+  position: relative;
+}
 @media screen and (max-width: 768px) {
   .square {
     width: 100%;
