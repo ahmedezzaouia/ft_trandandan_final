@@ -14,6 +14,7 @@ export default class GameRoom  {
         let data = {
             user1: {
                 socket: room.user1.socket.id,
+                user: room.user1.userdata,
                 x: room.user1.x,
                 y: room.user1.y,
                 score: room.user1.score,
@@ -21,6 +22,7 @@ export default class GameRoom  {
             },
             user2: {
                 socket: room.user2.socket.id,
+                user: room.user2.userdata,
                 x: room.user2.x,
                 y: room.user2.y,
                 score: room.user2.score,

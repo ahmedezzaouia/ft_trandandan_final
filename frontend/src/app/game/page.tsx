@@ -15,16 +15,16 @@ import { User } from '@/types';
 import { useStore } from 'zustand';
 
 const socket:Socket = io("http://localhost:3001");
-const user:User | null = useUserStore.getState().user;
+const user1:User | null = useUserStore.getState().user;
+let user2:User | null;
 
 const HomePage: React.FC = () => {
   const cvsRef = useRef<HTMLCanvasElement | null>(null);
   const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
   const [isGameStarted, setGameStarted] = useState(false);
   const [selectedMap, setSelectedMap] = useState<string | null>(null);
-  const [ballPosition, setBallPosition] = useState({ x: 50, y: 50 });
-  const [player1Position, setplayer1Position] = useState({ x: 0, y: 400 });
-  const [player2Position, setplayer2Position] = useState({ x: 1390, y: 400 });
+  const [player1Score, setPlayer1Score] = useState(0);
+  const [player2Score, setPlayer2Score] = useState(0);
   const [players, setStr2] = useState<any>({
     user1: {
       x : 0,
@@ -49,12 +49,6 @@ const HomePage: React.FC = () => {
     height: 10,
     color: "WHITE",
   };
-
-  const [player1Score, setPlayer1Score] = useState(0);
-  const [player2Score, setPlayer2Score] = useState(0);
-  const [isPlayer1Joined, setPlayer1Joined] = useState(false);
-  const [isPlayer2Joined, setPlayer2Joined] = useState(false);
-  const [delaystat, setdelaystat] = useState(false);
   let [string, setstr] = useState<any>("haha");
   interface map {
     id: number;
@@ -70,11 +64,6 @@ const HomePage: React.FC = () => {
     { id: 5, name: 'Map 5', imageUrl: '/img5.webp' },
     { id: 0, name: 'Default' },
   ];
-
-  const resetGame = () => {
-    setSelectedMap(null);
-    setGameStarted(false);
-  };
 
   const handleSelectMap = (mapId: string | null) => {
     setSelectedMap(mapId);
@@ -124,7 +113,7 @@ const HomePage: React.FC = () => {
       }
     };
     if (string != "you can play"){
-      socket.emit('AddUserToRoom', user);
+      socket.emit('AddUserToRoom', user1);
       const queuehundler = (str: string) => {
         setstr(str);
       }
@@ -173,24 +162,32 @@ const HomePage: React.FC = () => {
         else
           drawtext("YOU LOST", cvs.width / 3 , cvs.height / 2, "WHITE", "100px fantasy");
       }
-
+      // console.log(players.user1.user?.avatarUrl);
+      // console.log(players.user2.user?.avatarUrl);
       return () => {
         socket.off('userposition', hundler);
         cvs.removeEventListener("mousemove", move);
         };
     }
   }, [players, string]);
-
   return (
     <div>
-      <Head>{/* ... */}</Head>
-      <main className="page">
-        <div className="square">
-          <canvas className="canvas-container" width="1400" height="800" ref={cvsRef} ></canvas>
-        </div>
-      </main>
+      <div className="square">
+        {!isGameStarted ? (
+          <MapSelection
+            maps={maps}
+            onSelectMap={handleSelectMap}
+            onStartGame={handleStartGame}
+          />
+        ) : (
+          <div className="gameArea" style={{ backgroundImage: selectedMap ? `url(${maps.find((map) => map.id.toString() === selectedMap)?.imageUrl})` : 'none' }}>
+            <Score leftScore={player1Score} rightScore={player2Score} />
+            <canvas className="canvas-container" width="1400" height="800" ref={cvsRef}></canvas>
+          </div>
+        )}
+      </div>
     </div>
   );
+  
 }
-
 export default HomePage;

@@ -1,6 +1,8 @@
+"use client"
 import React from 'react';
 import Link from 'next/link';
 import './heroSection.css';
+
 
 const HeroSection: React.FC = () => {
   return (

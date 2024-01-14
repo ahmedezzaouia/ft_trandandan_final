@@ -76,7 +76,6 @@ export class notificationService {
                 },
                 
             });
-            console.log("friendRequests",friendRequests, data.username)
             return friendRequests;
             
         }

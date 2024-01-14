@@ -1,8 +1,11 @@
+"use client"
 import React from 'react';
 import './matchHistory.css';
+import dynamic from 'next/dynamic';
 
 const MatchHistory = ({games}:any) => {  
-  return <div className='matchHistory '>
+  return <>
+  <div className='matchHistory '>
     <h3 className='mhtitle'>Matches/History</h3>
     <div className="board">
       <div className="w-full max-w-2xl mx-auto">
@@ -60,6 +63,11 @@ const MatchHistory = ({games}:any) => {
       </div>
     </div>
   </div>
+  </>
+
 };
 
-export default MatchHistory;
+
+const MatchHistory2 = dynamic(() => Promise.resolve(MatchHistory), { ssr: false });
+
+export default MatchHistory2;

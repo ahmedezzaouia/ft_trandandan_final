@@ -118,7 +118,7 @@ export default function ChatContent({
     } else if (youAreBaned) {
       setAnnoncement("you are baned by the admin");
       return;
-    } else if (isBlockUser) {
+    } else if (isBlockUser && isDirectMessage) {
       setAnnoncement("you are blocked by your friend");
       return;
     } else {
@@ -263,8 +263,11 @@ export default function ChatContent({
     // List all messages from the channel
     socket.on("listChannelMessages", (data: any) => {
       DirectMessageBlockUser();
-
-      if (
+      if (data.msg.length === 0) {
+        setSenderMessages([]);
+        setRecieverMessages([]);
+        return;
+      } else if (
         data.msg[0]?.channel?.visibility === "protected" &&
         !isCorrectPassword
       ) {

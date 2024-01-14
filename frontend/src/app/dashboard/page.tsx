@@ -8,8 +8,10 @@ import MatchHistory from '@/components/matchHistory/matchHistory';
 import LeaderBoard from '@/components/leaderBoard/leaderBoard';
 import ChallengeFriend from '@components/challengeFriend/challengeFriend';
 import './dashboard.css'
+import dynamic from 'next/dynamic'
 
-export default function Dashboard() {
+
+function Dashboard() {
   const searchParams = useSearchParams();
 
   const userId = searchParams.get("id");
@@ -40,10 +42,14 @@ export default function Dashboard() {
       <div className="dashboardGrid">
         <ChallengeFriend />
         <AIopponent />
-        {user.games && <MatchHistory games={user.games}/>}
-        {user.leaderBoard && <LeaderBoard leaderBoard={user.leaderBoard}/>}
+        {user?.games && <MatchHistory games={user?.games}/>}
+        {user?.leaderBoard && <LeaderBoard leaderBoard={user?.leaderBoard}/>}
         {/* <FriendsList /> */}
       </div>
     </div>
   );
 }
+
+
+const Dashboard2 = dynamic(() => Promise.resolve(Dashboard), { ssr: false });
+export default  Dashboard2;

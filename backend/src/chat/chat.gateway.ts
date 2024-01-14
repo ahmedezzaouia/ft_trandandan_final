@@ -420,7 +420,6 @@ export class ChatGateway implements OnGatewayDisconnect{
       console.log('Channel not found removePassword data');
       return;
     }
-    console.log('data: ', data);
 
     const user = await this.prisma.user.findUnique({
       where: {
@@ -431,7 +430,6 @@ export class ChatGateway implements OnGatewayDisconnect{
       console.log('user not found');
       return;
     }
-    console.log('user: ', user);
     // check if the user is owner
     const checkOwner = await this.prisma.channel.findFirst({
       where: {
@@ -480,7 +478,6 @@ export class ChatGateway implements OnGatewayDisconnect{
     },
     @ConnectedSocket() client: Socket,
   ) {
-    console.log('data: ', data);
     if (!data.channelId && !data.password && !data.sender) {
       console.log('Channel not found changePassword data');
       return;
@@ -510,7 +507,6 @@ export class ChatGateway implements OnGatewayDisconnect{
         role: 'owner',
       },
     });
-    console.log('checkOwner: ', checkOwner);
 
     if (!checkOwner) {
       console.log('you are not owner');
@@ -650,7 +646,6 @@ export class ChatGateway implements OnGatewayDisconnect{
       channelId: string;
     },
   ) {
-    console.log('makeAdmin data: ', data);
     if (!data.sender || !data.member || !data.channelId) {
       console.log('Channel not found makeAdmin data');
       return;
@@ -806,7 +801,6 @@ export class ChatGateway implements OnGatewayDisconnect{
       channelId: string;
     },
   ) {
-    console.log('kickMember data: ', data);
     if (!data.sender || !data.member || !data.channelId) {
       console.log('Channel not found kickMember data');
       return;
@@ -990,7 +984,6 @@ export class ChatGateway implements OnGatewayDisconnect{
       channelId: string;
     },
   ){
-    console.log('BanMember data: ', data);
     if (!data.sender || !data.member || !data.channelId) {
       console.log('Channel not found BanMember data');
       return;
@@ -1093,7 +1086,6 @@ export class ChatGateway implements OnGatewayDisconnect{
           username: data.member,
         },
       });
-      console.log('member2: ', member2);
   
       const checkMember2 = await this.prisma.channelMembership.findFirst({
         where: {
@@ -1150,7 +1142,6 @@ export class ChatGateway implements OnGatewayDisconnect{
       Muted: boolean;
     },
   ) {
-    console.log('MuteMember data: ', data);
     if (!data.sender || !data.member || !data.channelId) {
       console.log('Channel not found MuteMember data');
       return;
@@ -1287,7 +1278,6 @@ export class ChatGateway implements OnGatewayDisconnect{
       }
   
       if (data.Muted) {
-        console.log("muted is true")
         const isMutedMember2 = await this.prisma.channelMembership.update({
           where: {
             id: checkMember2.id,
@@ -1298,7 +1288,6 @@ export class ChatGateway implements OnGatewayDisconnect{
         });
   
         this.server.emit('MuteMember', isMutedMember2);
-        console.log('isMutedMember3: ', isMutedMember2);
         return isMutedMember2;
       }
   
@@ -1314,7 +1303,6 @@ export class ChatGateway implements OnGatewayDisconnect{
       });
   
       this.server.emit('MuteMember', "owner muted member");
-      console.log('muteMember2: ', muteMember2);
       return muteMember2;
     }
   }
@@ -1409,7 +1397,6 @@ export class ChatGateway implements OnGatewayDisconnect{
     },
     @ConnectedSocket() client: Socket,
     ) {
-      console.log('leaveChannel data: ', data);
       if (!data.channelId && !data.sender) {
         console.log('Channel not found leaveChannel data');
         return;

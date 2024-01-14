@@ -63,10 +63,6 @@ export class channelService {
           },
         });
 
-        // if (isexist){
-        //   console.log('Channel found1');
-        //   return;
-        // }
     
         if (!isexist) {
           throw new Error('Channel not found createChannelMessage');
