@@ -3,7 +3,6 @@ import React, { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useUserStore } from "@/store";
 import AIopponent from '@/components/AIopponent/AIopponent';
-import FriendsList from '@/components/friendsList/friendsList';
 import MatchHistory from '@/components/matchHistory/matchHistory';
 import LeaderBoard from '@/components/leaderBoard/leaderBoard';
 import ChallengeFriend from '@components/challengeFriend/challengeFriend';
