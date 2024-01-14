@@ -3,13 +3,12 @@ import "./chatContent.css";
 
 import TopBar from "./topbar/topbar";
 
-import { use, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { useState } from "react";
 import socket from "@services/socket";
 import { useIsDirectMessage } from "@/store/userStore";
 import useRecieverStore from "@/store/recieverStore";
 import useUsernameStore from "@/store/usernameStore";
-import { data } from "autoprefixer";
 
 type User = {
   username: string;
@@ -36,11 +35,7 @@ export default function ChatContent({
   const [senderMessages, setSenderMessages] = useState<
     { user: User; sender: string; channel: string; message: string }[]
   >([]);
-  const [avaterUser, setAvaterUser] = useState("");
-  const [NameUser, setNameUser] = useState("");
-  const [avaterReciever, setAvaterReciever] = useState("");
   const [arrayMessages, setArrayMessages] = useState<any>([]);
-  const [serverChannel, setServerChannel] = useState("");
   const [password, setPassword] = useState("");
   const [isCorrectPassword, setIsCorrectPassword] = useState(false);
   const [showWrongPassword, setShowWrongPassword] = useState(false);
@@ -48,30 +43,26 @@ export default function ChatContent({
   const [isBlockUser, setBlockUser] = useState(false);
   const [youAreBaned, setYouAreBaned] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
-  const [arrayBlockedUsers, setArrayBlockedUsers] = useState<any>([]);
-  const [blockerUsername, setBlockerUsername] = useState<any>([]);
-  const [getblockedid, setGetblockedid] = useState<any>([]);
   const [newFriend, setNewFriend] = useState(false);
   const [annoncement, setAnnoncement] = useState("");
 
-  async function fetchUsername() {
-    const storedUserData = sessionStorage.getItem("user-store");
-    if (storedUserData) {
-      try {
-        const userData = await JSON.parse(storedUserData);
-        if (!userData) return;
-        const saveusername = userData.state.user?.username;
-        // setUsername(saveusername);
-        setUsername(saveusername);
-      } catch (error) {
-        console.log("Error parsing stored data:", error);
-      }
-    } else {
-      console.log("User data not found in session storage.");
-    }
-  }
-
   useEffect(() => {
+    async function fetchUsername() {
+      const storedUserData = sessionStorage.getItem("user-store");
+      if (storedUserData) {
+        try {
+          const userData = await JSON.parse(storedUserData);
+          if (!userData) return;
+          const saveusername = userData.state.user?.username;
+          // setUsername(saveusername);
+          setUsername(saveusername);
+        } catch (error) {
+          console.log("Error parsing stored data:", error);
+        }
+      } else {
+        console.log("User data not found in session storage.");
+      }
+    }
     // Search for the username and set it in the state
     fetchUsername(); // Fetch the username
   }, []);
@@ -80,7 +71,6 @@ export default function ChatContent({
     const chatMessageRef = MessageRef.current;
     if (chatMessageRef) {
       (chatMessageRef as any).scrollTop = (chatMessageRef as any).scrollHeight;
-      // to explain this code i will give an example
       // if the chat content is 500px and the chat messages is 1000px
       // the scroll bar will be at the bottom of the chat
       // so i will set the scroll bar to the bottom of the chat
@@ -106,7 +96,6 @@ export default function ChatContent({
   const sendMessage = () => {
     // Send the message input to the serv
     if (messageInput === "" || channel === "") return;
-    GetBlockedUsers();
     checkIfTheUserIsBaned();
     checkIfTheUserIsMuted();
     DirectMessageBlockUser();
@@ -220,33 +209,6 @@ export default function ChatContent({
     });
   };
 
-  //----------- handle get blocked users ----------------
-  const GetBlockedUsers = () => {
-    socket.emit("checkIfTheUserIsBlocked", {
-      sender: username,
-      reciever: reciever,
-    });
-    socket.on("checkIfTheUserIsBlocked", (data) => {
-      if (data) {
-        for (let i = 0; i < data.length; i++) {
-          const blockerUserId = data[i].blockerUser;
-          const getblockedid = data[i].getblockedid;
-          setGetblockedid(getblockedid);
-          socket.emit("getUserById", { id: blockerUserId });
-          socket.on("getUserById", (data) => {
-            const blockerUsername = data.username;
-            setBlockerUsername(blockerUsername);
-          });
-          return () => {
-            socket.off("getUserById");
-          };
-        }
-      }
-    });
-    return () => {
-      socket.off("checkIfTheUserIsBlocked");
-    };
-  };
 
   //----------- handle list channel messages ----------------
 
@@ -287,36 +249,16 @@ export default function ChatContent({
         if (serverChannel === staticChannelName) {
           if (usernameFromServer !== usernameFromSession) {
             // i return 2 arrays one for the sender and the other for the reciever and i check if the username is the sender or the reciever to set the messages
-            GetBlockedUsers();
-            for (let i = 0; i < data.msg.length; i++) {
-              if (data.msg[i]?.user?.id === getblockedid && blockerUsername === username) {
-                setSenderMessages(
-                  data.msg.filter((message: any) => {
-                    return message.user.username === username; // filter the blocked user messages
-                  })
-                );
-                setAvaterUser(data.msg[0]?.user.avatarUrl);
-                setNameUser(user?.username);
-                // clear the reciever messages
-                setRecieverMessages([]);
-              } 
-              else {
-                setRecieverMessages(data.msg);
-                setAvaterReciever(data.msg[0]?.user.avatarUrl);
-                setNameUser(user?.username);
-                // clear the sender messages
-                setSenderMessages([]);
-              }
-            }
-          } 
-          else {
             setSenderMessages(data.msg);
-            setAvaterUser(data.msg[0]?.user.avatarUrl);
-            setNameUser(user?.username);
-            // clear the reciever messages
             setRecieverMessages([]);
+          } else {
+            setRecieverMessages(data.msg);
+            setSenderMessages([]);
           }
         }
+      } else {
+        setSenderMessages(data.msg);
+        setRecieverMessages([]);
       }
     });
   };
@@ -419,10 +361,8 @@ export default function ChatContent({
   }, [isDirectMessage, channel, isCorrectPassword, youAreBaned]);
 
   useEffect(() => {
-    
     setArrayMessages([]);
     handlelistDirectMessages();
-    console.log("reciever", reciever);
     return () => {
       socket.off("listDirectMessages");
     };
@@ -435,13 +375,15 @@ export default function ChatContent({
   useEffect(() => {
     socket.emit("onlineStatus", { username: user?.username, status: "online" });
     // if user click on close tab or change the url set the status to offline
+    // the addEventListener is a built in function in the browser to handle the events
+    // beforeunload is an event when the user click on close tab or change the url the event will be fired
     window.addEventListener("beforeunload", () => {
       socket.emit("onlineStatus", {
         username: user?.username,
         status: "offline",
       });
     });
-  }, [username]);
+  }, [username, reciever]);
 
   return (
     <div className="chat-content flex-1 flex flex-col overflow-hidden rounded-3xl shadow border border-gray-800 ">
@@ -476,81 +418,83 @@ export default function ChatContent({
           }
           {/* <!-- A response message --> */}
         </div>
-      ) :  !annoncement && (
-        // channel messages
-        
-        <div className=" p-14 flex-1 overflow-auto" ref={MessageRef}>
-          <div className="flex flex-col mb-4 text-sm">
-            {isProtected && !isCorrectPassword && (
-              // input to enter the password
+      ) : (
+        !annoncement && (
+          // channel messages
 
-              <div className="flex items-center justify-center my-60 ">
-                <div className="flex flex-col">
-                  <div className="flex items-center justify-between">
-                    <input
-                      type="text"
-                      name="password"
-                      placeholder="Enter password ..."
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      // onKeyDown={checkIfChannelIsProtected}
-                      className="bg-slate-900 w-full my-5 rounded-lg border border-gray-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-gray-700 focus:ring-offset-2 focus:ring-offset-gray-800"
-                    />
-                    <button
-                      type="button"
-                      className="text-white bg-gradient-to-r from-teal-400 via-teal-500 to-teal-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-teal-300 dark:focus:ring-teal-800 shadow-lg shadow-teal-500/50 dark:shadow-lg dark:shadow-teal-800/80 rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 mt-2 ml-2 font-semibold"
-                      onClick={checkIfChannelIsProtected}
-                    >
-                      Enter
-                    </button>
+          <div className=" p-14 flex-1 overflow-auto" ref={MessageRef}>
+            <div className="flex flex-col mb-4 text-sm">
+              {isProtected && !isCorrectPassword && (
+                // input to enter the password
+
+                <div className="flex items-center justify-center my-60 ">
+                  <div className="flex flex-col">
+                    <div className="flex items-center justify-between">
+                      <input
+                        type="text"
+                        name="password"
+                        placeholder="Enter password ..."
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        // onKeyDown={checkIfChannelIsProtected}
+                        className="bg-slate-900 w-full my-5 rounded-lg border border-gray-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-gray-700 focus:ring-offset-2 focus:ring-offset-gray-800"
+                      />
+                      <button
+                        type="button"
+                        className="text-white bg-gradient-to-r from-teal-400 via-teal-500 to-teal-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-teal-300 dark:focus:ring-teal-800 shadow-lg shadow-teal-500/50 dark:shadow-lg dark:shadow-teal-800/80 rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 mt-2 ml-2 font-semibold"
+                        onClick={checkIfChannelIsProtected}
+                      >
+                        Enter
+                      </button>
+                    </div>
+
+                    {showWrongPassword && (
+                      <div>
+                        <p className="text-red-500 font-bold ml-2">
+                          wrong password
+                        </p>
+                      </div>
+                    )}
                   </div>
-
-                  {showWrongPassword && (
-                    <div>
-                      <p className="text-red-500 font-bold ml-2">
-                        wrong password
+                </div>
+              )}
+              {!isProtected &&
+                senderMessages.map((message, index) => (
+                  <div key={index}>
+                    <div className="flex items-center">
+                      <img
+                        src={message.user?.avatarUrl}
+                        className="w-10 h-10 rounded-full mr-3"
+                      />
+                      <p className="font-bold text-white">
+                        {message.user?.username}
                       </p>
                     </div>
-                  )}
-                </div>
-              </div>
-            )}
-            {!isProtected &&
-              senderMessages.map((message, index) => (
-                <div key={index}>
-                  <div className="flex items-center">
-                    <img
-                      src={message.user?.avatarUrl}
-                      className="w-10 h-10 rounded-full mr-3"
-                    />
-                    <p className="font-bold text-white">
-                      {message.user?.username}
+                    <p className="text-white font-sans px-14">
+                      {message.message}
                     </p>
                   </div>
-                  <p className="text-white font-sans px-14">
-                    {message.message}
-                  </p>
-                </div>
-              ))}
-            {!isProtected &&
-              recieverMessages.map((message, index) => (
-                <div key={index}>
-                  <div className="flex items-center">
-                    <img
-                      src={message.user?.avatarUrl}
-                      className="w-10 h-10 rounded-full mr-3"
-                    />
-                    <p className="font-bold text-white">
-                      {message.user?.username}
+                ))}
+              {!isProtected &&
+                recieverMessages.map((message, index) => (
+                  <div key={index}>
+                    <div className="flex items-center">
+                      <img
+                        src={message.user?.avatarUrl}
+                        className="w-10 h-10 rounded-full mr-3"
+                      />
+                      <p className="font-bold text-white">
+                        {message.user?.username}
+                      </p>
+                    </div>
+                    <p className="text-white font-sans px-14">
+                      {message.message}
                     </p>
                   </div>
-                  <p className="text-white font-sans px-14">
-                    {message.message}
-                  </p>
-                </div>
-              ))}
+                ))}
+            </div>
           </div>
-        </div>
+        )
       )}
       {annoncement && (
         <div className="flex items-center justify-center my-96">
@@ -577,7 +521,6 @@ export default function ChatContent({
           </div>
         </div>
       )}
-
 
       {/* <!-- Chat input --> */}
       {!isProtected && (

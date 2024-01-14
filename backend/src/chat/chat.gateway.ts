@@ -117,6 +117,7 @@ export class ChatGateway implements OnGatewayDisconnect{
         this.server.to(data.channel).emit('listChannelMessages', { msg });
       } else {
         console.error('No messages found.');
+        return;
       }
     } catch (error) {
       console.error('Error while fetching messages:', error);
