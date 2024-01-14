@@ -12,16 +12,13 @@
   .right-score {
     font-size: 49px;
     color: black;
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
   }
   
-  .left-score {
+  /* .left-score {
     left: 5%;
   }
   
   .right-score {
     right: 5%;
-  }
+  } */
   

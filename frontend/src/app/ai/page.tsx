@@ -1,9 +1,5 @@
 "use client"
-// Import statements...
-import { Socket } from 'socket.io'
-import { io } from 'socket.io-client';
 import React, { useRef, useState, useEffect } from 'react';
-import Head from 'next/head';
 import MapSelection from "@/components/MapSelection/MapSelection";
 import Score from '@/components/scores/scores';
 import { useUserStore } from '@/store';
@@ -11,86 +7,87 @@ import { User } from '@/types';
 import { Room } from './../../../../backend/src/game/infos.dto';
 import './../game/game.css'
 
-const socket:Socket = io("http://localhost:3001");
-const user:User | null = useUserStore.getState().user;
 
 const collision = (b: any, p: any) => {
-    b.top = b.y - 15;
-    b.bottom = b.y + 15;
-    b.left = b.x - 15;
-    b.right = b.x + 15;
-    
-    p.top = p.y;
-    p.bottom = p.y + 200;
-    p.left = p.x;
-    p.right = p.x + 10;
-    
-    return b.right > p.left && b.bottom > p.top && b.left < p.right && b.top < p.bottom;
-};
+  b.top = b.y - 15;
+  b.bottom = b.y + 15;
+  b.left = b.x - 15;
+  b.right = b.x + 15;
   
+  p.top = p.y;
+  p.bottom = p.y + 200;
+  p.left = p.x;
+  p.right = p.x + 10;
+  
+  return b.right > p.left && b.bottom > p.top && b.left < p.right && b.top < p.bottom;
+};
+
 const resetball = (room: Room): Room => {
-    room.ball.x = room.width/2;
-    room.ball.y = room.height/2;
-    room.ball.speed = 5;
-    room.ball.velocityY = 5;
-    return room;
+  room.ball.x = room.width/2;
+  room.ball.y = room.height/2;
+  room.ball.speed = 5;
+  room.ball.velocityY = 5;
+  return room;
 };
-  
+
 export const update = (room: Room): Room => {
-    room.user2.x = room.width - 10;
-    room.ball.x += room.ball.velocityX;
-    room.ball.y += room.ball.velocityY;
-    const ballradius = 15;
-    if (room.ball.y + ballradius >= room.height ){
-        room.ball.y = room.height - ballradius;
-        room.ball.velocityY *= -1;
-    }
-    if (room.ball.y - ballradius <= 0){
-        room.ball.y = ballradius;
-        room.ball.velocityY *= -1;
-    }
-    let player = (room.ball.x < room.width/2) ? room.user1 : room.user2;
-    if (collision(room.ball, player)){
-        let collidepoint = room.ball.y - (player.y + 100);
-        collidepoint = collidepoint/(100);
-        
-        let angle = collidepoint * Math.PI/4;
-        let dir = (room.ball.x < room.width/2) ? 1 : -1;
-        room.ball.velocityX = dir * room.ball.speed * Math.cos(angle);
-        room.ball.velocityY = room.ball.speed * Math.sin(angle);
-        
-        room.ball.speed += 1;
-    }
-    if (room.ball.x < 0){
-        room.user2.score++;
-        room.ball.velocityX = -5;
-        room = resetball(room);
-    }
-    else if (room.ball.x > room.width) {
-        room.user1.score++;
-        room.ball.velocityX = 5;
-        room = resetball(room);
-    }
-    if (room.user1.score == 5){
-        room.user1.status = true;
-    }
-    if (room.user2.score == 5){
-        room.user2.status = true;
-    }
-    return room;
+  room.user2.x = room.width - 10;
+  room.ball.x += room.ball.velocityX;
+  room.ball.y += room.ball.velocityY;
+  const ballradius = 15;
+  if (room.ball.y + ballradius >= room.height ){
+    room.ball.y = room.height - ballradius;
+    room.ball.velocityY *= -1;
+  }
+  if (room.ball.y - ballradius <= 0){
+    room.ball.y = ballradius;
+    room.ball.velocityY *= -1;
+  }
+  let player = (room.ball.x < room.width/2) ? room.user1 : room.user2;
+  if (collision(room.ball, player)){
+    let collidepoint = room.ball.y - (player.y + 100);
+    collidepoint = collidepoint/(100);
+    
+    let angle = collidepoint * Math.PI/4;
+    let dir = (room.ball.x < room.width/2) ? 1 : -1;
+    room.ball.velocityX = dir * room.ball.speed * Math.cos(angle);
+    room.ball.velocityY = room.ball.speed * Math.sin(angle);
+    
+    room.ball.speed += 1;
+  }
+  if (room.ball.x < 0){
+    room.user2.score++;
+    room.ball.velocityX = -5;
+    room = resetball(room);
+  }
+  else if (room.ball.x > room.width) {
+    room.user1.score++;
+    room.ball.velocityX = 5;
+    room = resetball(room);
+  }
+  if (room.user1.score == 5){
+    room.user1.status = true;
+  }
+  if (room.user2.score == 5){
+    room.user2.status = true;
+  }
+  return room;
 }
+
+const user:User | null = useUserStore.getState().user;
 
 const HomePage: React.FC = () => {
   const cvsRef = useRef<HTMLCanvasElement | null>(null);
   const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
   const [isGameStarted, setGameStarted] = useState(false);
-  const [selectedMap, setSelectedMap] = useState<string | null>(null);
+  const [selectedMap, setSelectedMap] = useState<number>(0);
   const [player1Score, setPlayer1Score] = useState(0);
   const [player2Score, setPlayer2Score] = useState(0);
+  console.log("🚀 ~ selectedMap:", selectedMap)
   let players: Room = {
     user1: {
         socket: null,
-        userdata: null,
+        user: user,
         x: 0,
         y: 400,
         score: 0,
@@ -98,10 +95,10 @@ const HomePage: React.FC = () => {
     },
     user2: {
         socket: null,
-        userdata: null,
-        score : 0,
+        user: user,
         x : 1390,
         y : 400,
+        score : 0,
         status: false
     },
     ball: {
@@ -131,12 +128,12 @@ const HomePage: React.FC = () => {
   }
 
   const maps: map[] = [
+    { id: 0, name: 'Default' },
     { id: 1, name: 'Map 1', imageUrl: '/img1.jpg' },
     { id: 2, name: 'Map 2', imageUrl: '/img2.jpg' },
     { id: 3, name: 'Map 3', imageUrl: '/img3.jpg' },
     { id: 4, name: 'Map 4', imageUrl: '/img4.jpg' },
     { id: 5, name: 'Map 5', imageUrl: '/img5.webp' },
-    { id: 0, name: 'Default' },
   ];
 
   const handleSelectMap = (mapId: string | null) => {
@@ -185,8 +182,6 @@ const HomePage: React.FC = () => {
         }
     };
     const move = (evt: any) => {
-        // let rect = cvs.getBoundingClientRect();
-        
         players.user1.y = evt.clientY - 100;
     }
     
@@ -200,8 +195,14 @@ const HomePage: React.FC = () => {
             }
             players.timer += 1;
             if (players.delay){
+              if (selectedMap != 0){
+                const image = new Image();
+                image.src = String(maps[selectedMap].imageUrl);
+                ctx.drawImage(image, 0, 0, cvs.width, cvs.height);
+              }
+              else
                 drawrect(0, 0, cvs.width, cvs.height, "BLACK");
-                drawtext(players.delay, cvs.width / 2.5 , 2 * cvs.height / 3, "WHITE", "500px fantasy");
+              drawtext(players.delay, cvs.width / 2.5 , 2 * cvs.height / 3, "WHITE", "500px fantasy");
             }
             return;
         }
@@ -210,11 +211,14 @@ const HomePage: React.FC = () => {
         players = update(players);
         setPlayer1Score(players.user1.score);
         setPlayer2Score(players.user2.score);
-        drawrect(0, 0, cvs.width, cvs.height, "BLACK");
+        if (selectedMap != 0){
+          const image = new Image();
+          image.src = String(maps[selectedMap].imageUrl);
+          ctx.drawImage(image, 0, 0, cvs.width, cvs.height);
+        }
+        else
+          drawrect(0, 0, cvs.width, cvs.height, "BLACK");
         drawNet();
-        
-        drawtext(players.user1.score, cvs.width / 4, cvs.height / 5, "WHITE", "50px fantasy");
-        drawtext(players.user2.score, (3 * cvs.width) / 4, cvs.height / 5, "WHITE", "50px fantasy");
         
         drawrect(players.user1.x, players.user1.y, 10, 200, "WHITE");
         drawrect(players.user2.x, players.user2.y, 10, 200, "WHITE");
@@ -233,19 +237,28 @@ const HomePage: React.FC = () => {
     return () => {
         window.removeEventListener("mousemove", move);
     };
-  }, []);
+  }, [isGameStarted]);
 
-  return (
-    <div>
-      <Head>{/* ... */}</Head>
-
-        <div className="square">
-          <Score leftScore={player1Score} rightScore={player2Score} />
-          <canvas className="canvas-container" width="1400" height="800" ref={cvsRef} ></canvas>
-        </div>
-
-    </div>
-  );
+  if (isGameStarted){
+    return (
+      <>
+          <Score player1score={player1Score} player2score={player2Score} player1avatar={players.user1.user?.avatarUrl} player2avatar={players.user2.user?.avatarUrl} isAI={true}/>
+          <canvas className="canvas-container" width="1400" height="800" ref={cvsRef}></canvas>
+      </>
+    );
+  }
+  else
+  {
+    return (
+      <div className='square'>
+        <MapSelection
+          maps={maps}
+          onSelectMap={handleSelectMap}
+          onStartGame={handleStartGame}
+        />
+      </div>
+    );
+  }
 }
 
 export default HomePage;

@@ -15,26 +15,27 @@ import { User } from '@/types';
 import { useStore } from 'zustand';
 
 const socket:Socket = io("http://localhost:3001");
-const user1:User | null = useUserStore.getState().user;
-let user2:User | null;
+const user:User | null = useUserStore.getState().user;
 
 const HomePage: React.FC = () => {
   const cvsRef = useRef<HTMLCanvasElement | null>(null);
   const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
   const [isGameStarted, setGameStarted] = useState(false);
-  const [selectedMap, setSelectedMap] = useState<string | null>(null);
+  const [selectedMap, setSelectedMap] = useState<number>(0);
   const [player1Score, setPlayer1Score] = useState(0);
   const [player2Score, setPlayer2Score] = useState(0);
   const [players, setStr2] = useState<any>({
     user1: {
       x : 0,
       y : 0,
-      score : 0
+      score : 0,
+      user: null
     },
     user2: {
         x : 0,
         y : 0,
-        score : 0
+        score : 0,
+        user: null
     },
     ball : {
         x: 0,
@@ -57,12 +58,12 @@ const HomePage: React.FC = () => {
   }
 
   const maps: map[] = [
+    { id: 0, name: 'Default'},
     { id: 1, name: 'Map 1', imageUrl: '/img1.jpg' },
     { id: 2, name: 'Map 2', imageUrl: '/img2.jpg' },
     { id: 3, name: 'Map 3', imageUrl: '/img3.jpg' },
     { id: 4, name: 'Map 4', imageUrl: '/img4.jpg' },
     { id: 5, name: 'Map 5', imageUrl: '/img5.webp' },
-    { id: 0, name: 'Default' },
   ];
 
   const handleSelectMap = (mapId: string | null) => {
@@ -112,38 +113,47 @@ const HomePage: React.FC = () => {
         ctx.fillText(text.toString(), x, y);
       }
     };
+
+
     if (string != "you can play"){
-      socket.emit('AddUserToRoom', user1);
+      socket.emit('AddUserToRoom', user);
       const queuehundler = (str: string) => {
         setstr(str);
       }
       socket.on('wait', queuehundler);
-      drawrect(0, 0, cvs.width, cvs.height, "BLACK");
+      
+      if (selectedMap != 0){
+        const image = new Image();
+        image.src = String(maps[selectedMap].imageUrl);
+        ctx.drawImage(image, 0, 0, cvs.width, cvs.height);
+      }
+      else
+        drawrect(0, 0, cvs.width, cvs.height, "BLACK");
       drawtext("WAIT FOR OTHER PLAYER", cvs.width / 3, cvs.height / 2, "WHITE", "50px fantasy");
     }
     if (string == "you can play"){
       const hundler = (init : any) => {
         setStr2(init);
       };
-      
       socket.on('userposition', hundler);
-
-
       const move = (evt: any) => {
         let rect = cvs.getBoundingClientRect();
         
         let pos = evt.clientY - rect.top - 100;
         socket.emit('dataofmouse', pos);
       }
-
-      cvs.addEventListener("mousemove", move);
+      window.addEventListener("mousemove", move);
       setPlayer1Score(players.user1.score);
       setPlayer2Score(players.user2.score);
-      drawrect(0, 0, cvs.width, cvs.height, "BLACK");
+  
+      if (selectedMap != 0){
+        const image = new Image();
+        image.src = String(maps[selectedMap].imageUrl);
+        ctx.drawImage(image, 0, 0, cvs.width, cvs.height);
+      }
+      else
+        drawrect(0, 0, cvs.width, cvs.height, "BLACK");
       drawNet();
-      
-      drawtext(players.user1.score, cvs.width / 4, cvs.height / 5, "WHITE", "50px fantasy");
-      drawtext(players.user2.score, (3 * cvs.width) / 4, cvs.height / 5, "WHITE", "50px fantasy");
       
       drawrect(players.user1.x, players.user1.y, 10, 200, "WHITE");
       drawrect(players.user2.x, players.user2.y, 10, 200, "WHITE");
@@ -162,32 +172,33 @@ const HomePage: React.FC = () => {
         else
           drawtext("YOU LOST", cvs.width / 3 , cvs.height / 2, "WHITE", "100px fantasy");
       }
-      // console.log(players.user1.user?.avatarUrl);
-      // console.log(players.user2.user?.avatarUrl);
       return () => {
         socket.off('userposition', hundler);
-        cvs.removeEventListener("mousemove", move);
+        window.removeEventListener("mousemove", move);
         };
     }
-  }, [players, string]);
-  return (
-    <div>
-      <div className="square">
-        {!isGameStarted ? (
-          <MapSelection
-            maps={maps}
-            onSelectMap={handleSelectMap}
-            onStartGame={handleStartGame}
-          />
-        ) : (
-          <div className="gameArea" style={{ backgroundImage: selectedMap ? `url(${maps.find((map) => map.id.toString() === selectedMap)?.imageUrl})` : 'none' }}>
-            <Score leftScore={player1Score} rightScore={player2Score} />
-            <canvas className="canvas-container" width="1400" height="800" ref={cvsRef}></canvas>
-          </div>
-        )}
-      </div>
-    </div>
-  );
+  }, [players, string, isGameStarted]);
   
+  if (isGameStarted){
+    return (
+      <>
+          <Score player1score={players.user1.score} player2score={players.user2.score} player1avatar={players.user1.user?.avatarUrl} player2avatar={players.user2.user?.avatarUrl} isAI={false}/>
+          <canvas className="canvas-container" width="1400" height="800" ref={cvsRef}></canvas>
+      </>
+    );
+  }
+  else
+  {
+    return (
+      <>
+        <MapSelection
+          maps={maps}
+          onSelectMap={handleSelectMap}
+          onStartGame={handleStartGame}
+        />
+      </>
+    );
+  }
 }
+
 export default HomePage;
