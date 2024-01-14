@@ -372,18 +372,13 @@ export default function ChatContent({
     setNewFriend(!newFriend);
   };
 
-  useEffect(() => {
-    socket.emit("onlineStatus", { username: user?.username, status: "online" });
-    // if user click on close tab or change the url set the status to offline
-    // the addEventListener is a built in function in the browser to handle the events
-    // beforeunload is an event when the user click on close tab or change the url the event will be fired
-    window.addEventListener("beforeunload", () => {
-      socket.emit("onlineStatus", {
-        username: user?.username,
-        status: "offline",
-      });
+  socket.emit("onlineStatus", { username: user?.username, status: 'online' });
+  window.addEventListener("beforeunload", () => {
+    socket.emit("onlineStatus", {
+      username: user?.username,
+      status: "offline",
     });
-  }, [username, reciever]);
+  });
 
   return (
     <div className="chat-content flex-1 flex flex-col overflow-hidden rounded-3xl shadow border border-gray-800 ">

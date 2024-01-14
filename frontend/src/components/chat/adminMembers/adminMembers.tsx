@@ -87,6 +87,8 @@ export default function AdminsMembers({
       socket.off("getChannelById");
       socket.off("GetChannelAdmins");
       setDisableListMembers(false);
+      setAdmins([]);
+      setMember([]);
     };
   }, [channelId]);
 
@@ -214,7 +216,6 @@ export default function AdminsMembers({
   };
 
   const saveSender = (member: string) => {
-    console.log("member", member)
     setMember(member);
     setSetting(!Setting);
   };
@@ -227,6 +228,7 @@ export default function AdminsMembers({
 
     setShowMembersAndAdmins(!showMembersAndAdminsCmp);
   };
+  console.log("🚀 ~ admins:", admins)
 
   return (
     <>
